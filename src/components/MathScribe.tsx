@@ -133,9 +133,9 @@ const MathScribe: React.FC = () => {
   };
   
   // Handle expressions change from workspace
-  const handleExpressionsChange = (tabId: number, newTabExpressions: string[][]) => {
+  const handleExpressionsChange = (tabId: number, newTabExpressions: string[][][]) => {
     const updatedExpressions = [...expressions];
-    updatedExpressions[tabId] = newTabExpressions;
+    updatedExpressions[tabId] = newTabExpressions[tabId]; // Update just the expressions for the active tab
     setExpressions(updatedExpressions);
   };
 

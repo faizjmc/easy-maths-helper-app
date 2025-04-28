@@ -4,8 +4,8 @@ import { Plus, Undo, Redo, ArrowDown } from 'lucide-react';
 
 type WorkspaceProps = {
   activeTabId: number;
-  expressions: string[][]; 
-  onExpressionsChange: (tabId: number, expressions: string[][]) => void;
+  expressions: string[][][]; // Updated: 3D array to match MathScribe's structure
+  onExpressionsChange: (tabId: number, expressions: string[][][]) => void;
 };
 
 const Workspace: React.FC<WorkspaceProps> = ({ activeTabId, expressions, onExpressionsChange }) => {
@@ -14,7 +14,12 @@ const Workspace: React.FC<WorkspaceProps> = ({ activeTabId, expressions, onExpre
 
   const handleAddLine = () => {
     const newExpressions = [...expressions];
-    newExpressions[activeTabId] = [...newExpressions[activeTabId], ['']];
+    // Make sure we're adding to the correct tab's expressions
+    if (!newExpressions[activeTabId]) {
+      newExpressions[activeTabId] = [['']];
+    } else {
+      newExpressions[activeTabId] = [...newExpressions[activeTabId], ['']];
+    }
     onExpressionsChange(activeTabId, newExpressions);
     
     // Set cursor to beginning of new line
