@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Workspace from './Workspace';
 import SymbolGroup from './SymbolGroup';
@@ -6,14 +5,15 @@ import Settings from './Settings';
 import TabNavigation from './TabNavigation';
 import SymbolGroupNavigation from './SymbolGroupNavigation';
 import { symbolGroups } from '../data/symbolGroups';
+import { useExpressionHistory } from '../hooks/useExpressionHistory';
 
 const MathScribe: React.FC = () => {
   // State for handling tabs
   const [tabs, setTabs] = useState([{ id: 0, name: "Tab 1" }]);
   const [activeTab, setActiveTab] = useState(0);
   
-  // State for handling expressions (organized by tab)
-  const [expressions, setExpressions] = useState<string[][][]>([
+  // Initialize expression history
+  const { expressions, undo, redo, recordChange } = useExpressionHistory([
     [['']],  // Tab 0, initial empty expression
   ]);
   
@@ -34,7 +34,7 @@ const MathScribe: React.FC = () => {
     const targetTabExpressions = newExpressions[activeTab];
     const lastLineIndex = targetTabExpressions.length - 1;
     targetTabExpressions[lastLineIndex].push(symbol);
-    setExpressions(newExpressions);
+    recordChange(newExpressions);
   };
   
   const handleAddTab = () => {
@@ -42,7 +42,7 @@ const MathScribe: React.FC = () => {
     setTabs([...tabs, { id: newTabId, name: `Tab ${newTabId + 1}` }]);
     const newExpressions = [...expressions];
     newExpressions[newTabId] = [['']];
-    setExpressions(newExpressions);
+    recordChange(newExpressions);
     setActiveTab(newTabId);
   };
   
@@ -50,10 +50,8 @@ const MathScribe: React.FC = () => {
     setActiveTab(tabId);
   };
   
-  const handleExpressionsChange = (tabId: number, newTabExpressions: string[][][]) => {
-    const updatedExpressions = [...expressions];
-    updatedExpressions[tabId] = newTabExpressions[tabId];
-    setExpressions(updatedExpressions);
+  const handleExpressionsChange = (tabId: number, newExpressions: string[][][]) => {
+    recordChange(newExpressions);
   };
 
   return (

@@ -1,10 +1,11 @@
 
 import React, { useState, useRef } from 'react';
-import { Plus, Undo, Redo, ArrowDown } from 'lucide-react';
+import { Plus, Undo, Redo, Delete, Backspace } from 'lucide-react';
+import { Button } from './ui/button';
 
 type WorkspaceProps = {
   activeTabId: number;
-  expressions: string[][][]; // Updated: 3D array to match MathScribe's structure
+  expressions: string[][][];
   onExpressionsChange: (tabId: number, expressions: string[][][]) => void;
 };
 
@@ -14,7 +15,6 @@ const Workspace: React.FC<WorkspaceProps> = ({ activeTabId, expressions, onExpre
 
   const handleAddLine = () => {
     const newExpressions = [...expressions];
-    // Make sure we're adding to the correct tab's expressions
     if (!newExpressions[activeTabId]) {
       newExpressions[activeTabId] = [['']];
     } else {
@@ -27,18 +27,44 @@ const Workspace: React.FC<WorkspaceProps> = ({ activeTabId, expressions, onExpre
     setCursorPosition({ line: newLine, char: 0 });
   };
 
-  const handleUndo = () => {
-    // Undo logic would be implemented here
-    console.log("Undo operation");
+  const handleBackspace = () => {
+    const currentExpressions = [...expressions];
+    const currentLine = currentExpressions[activeTabId][cursorPosition.line];
+    
+    if (cursorPosition.char > 0) {
+      // Remove character at current position
+      currentLine.splice(cursorPosition.char - 1, 1);
+      setCursorPosition({ ...cursorPosition, char: cursorPosition.char - 1 });
+    } else if (cursorPosition.line > 0) {
+      // Merge with previous line if at start of line
+      const previousLine = currentExpressions[activeTabId][cursorPosition.line - 1];
+      const newPosition = previousLine.length;
+      previousLine.push(...currentLine);
+      currentExpressions[activeTabId].splice(cursorPosition.line, 1);
+      setCursorPosition({ line: cursorPosition.line - 1, char: newPosition });
+    }
+    
+    onExpressionsChange(activeTabId, currentExpressions);
   };
 
-  const handleRedo = () => {
-    // Redo logic would be implemented here
-    console.log("Redo operation");
+  const handleDelete = () => {
+    const currentExpressions = [...expressions];
+    const currentLine = currentExpressions[activeTabId][cursorPosition.line];
+    
+    if (cursorPosition.char < currentLine.length) {
+      // Remove character after cursor
+      currentLine.splice(cursorPosition.char, 1);
+    } else if (cursorPosition.line < currentExpressions[activeTabId].length - 1) {
+      // Merge with next line if at end of line
+      const nextLine = currentExpressions[activeTabId][cursorPosition.line + 1];
+      currentLine.push(...nextLine);
+      currentExpressions[activeTabId].splice(cursorPosition.line + 1, 1);
+    }
+    
+    onExpressionsChange(activeTabId, currentExpressions);
   };
 
   const handleFocus = () => {
-    // Focus the workspace area when clicked
     if (workspaceRef.current) {
       workspaceRef.current.focus();
     }
@@ -57,7 +83,6 @@ const Workspace: React.FC<WorkspaceProps> = ({ activeTabId, expressions, onExpre
               <span className="h-6 w-0.5 bg-mathPurple animate-pulse mx-0.5"></span>
             )}
             <span>{expr}</span>
-            {/* Add cursor at end of line if needed */}
             {charIndex === line.length - 1 && cursorPosition.line === lineIndex && cursorPosition.char === line.length && (
               <span className="h-6 w-0.5 bg-mathPurple animate-pulse mx-0.5"></span>
             )}
@@ -70,28 +95,42 @@ const Workspace: React.FC<WorkspaceProps> = ({ activeTabId, expressions, onExpre
   return (
     <div className="border-2 border-mathPurple rounded-lg p-4 mb-4 bg-white h-[250px] md:h-[300px] overflow-auto">
       <div className="flex justify-end space-x-2 mb-4">
-        <button
+        <Button
           onClick={handleAddLine}
           className="function-button bg-mathPurple/10 flex items-center gap-1"
           aria-label="Add new line"
         >
           <Plus size={20} />
           <span>Add Line</span>
-        </button>
-        <button 
-          onClick={handleUndo}
+        </Button>
+        <Button 
+          onClick={() => onExpressionsChange(activeTabId, expressions)}
           className="function-button"
           aria-label="Undo"
         >
           <Undo size={20} />
-        </button>
-        <button 
-          onClick={handleRedo}
+        </Button>
+        <Button 
+          onClick={() => onExpressionsChange(activeTabId, expressions)}
           className="function-button"
           aria-label="Redo"
         >
           <Redo size={20} />
-        </button>
+        </Button>
+        <Button
+          onClick={handleBackspace}
+          className="function-button"
+          aria-label="Backspace"
+        >
+          <Backspace size={20} />
+        </Button>
+        <Button
+          onClick={handleDelete}
+          className="function-button"
+          aria-label="Delete"
+        >
+          <Delete size={20} />
+        </Button>
       </div>
       
       <div 
