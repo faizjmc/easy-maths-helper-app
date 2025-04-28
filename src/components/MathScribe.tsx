@@ -81,6 +81,8 @@ const MathScribe: React.FC = () => {
         activeTabId={activeTab} 
         expressions={expressions} 
         onExpressionsChange={handleExpressionsChange} 
+        onUndo={handleUndo}
+        onRedo={handleRedo}
       />
       
       <SymbolGroupNavigation

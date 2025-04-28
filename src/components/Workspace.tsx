@@ -7,9 +7,17 @@ type WorkspaceProps = {
   activeTabId: number;
   expressions: string[][][];
   onExpressionsChange: (tabId: number, expressions: string[][][]) => void;
+  onUndo: () => void;
+  onRedo: () => void;
 };
 
-const Workspace: React.FC<WorkspaceProps> = ({ activeTabId, expressions, onExpressionsChange }) => {
+const Workspace: React.FC<WorkspaceProps> = ({ 
+  activeTabId, 
+  expressions, 
+  onExpressionsChange,
+  onUndo,
+  onRedo
+}) => {
   const [cursorPosition, setCursorPosition] = useState<{ line: number; char: number }>({ line: 0, char: 0 });
   const workspaceRef = useRef<HTMLDivElement>(null);
 
@@ -104,14 +112,14 @@ const Workspace: React.FC<WorkspaceProps> = ({ activeTabId, expressions, onExpre
           <span>Add Line</span>
         </Button>
         <Button 
-          onClick={() => onExpressionsChange(activeTabId, expressions)}
+          onClick={onUndo}
           className="function-button"
           aria-label="Undo"
         >
           <Undo size={20} />
         </Button>
         <Button 
-          onClick={() => onExpressionsChange(activeTabId, expressions)}
+          onClick={onRedo}
           className="function-button"
           aria-label="Redo"
         >
