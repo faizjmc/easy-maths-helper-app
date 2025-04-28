@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,18 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Custom colors for the app
+				mathPurple: {
+					light: '#E5DEFF',
+					DEFAULT: '#9b87f5',
+					dark: '#7E69AB'
+				},
+				mathBlue: '#D3E4FD',
+				mathGreen: '#F2FCE2',
+				mathYellow: '#FEF7CD',
+				mathOrange: '#FEC6A1',
+				mathPink: '#FFDEE2'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,11 +96,17 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'button-press': {
+					'0%': { transform: 'scale(1)' },
+					'50%': { transform: 'scale(0.95)' },
+					'100%': { transform: 'scale(1)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'button-press': 'button-press 0.2s ease-in-out'
 			}
 		}
 	},
