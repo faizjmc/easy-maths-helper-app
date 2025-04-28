@@ -1,7 +1,8 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Plus, Undo, Redo, Trash2 } from 'lucide-react';
 import { Button } from './ui/button';
+import { useToast } from '../hooks/use-toast';
 
 type WorkspaceProps = {
   activeTabId: number;
@@ -20,6 +21,7 @@ const Workspace: React.FC<WorkspaceProps> = ({
 }) => {
   const [cursorPosition, setCursorPosition] = useState<{ line: number; char: number }>({ line: 0, char: 0 });
   const workspaceRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   const handleAddLine = () => {
     const newExpressions = [...expressions];
@@ -78,6 +80,22 @@ const Workspace: React.FC<WorkspaceProps> = ({
     }
   };
 
+  const handleUndo = () => {
+    onUndo();
+    toast({
+      title: "Undone",
+      description: "Previous state restored",
+    });
+  };
+
+  const handleRedo = () => {
+    onRedo();
+    toast({
+      title: "Redone",
+      description: "Action restored",
+    });
+  };
+
   // Helper function to render cursor at current position
   const renderExpressions = () => {
     return expressions[activeTabId]?.map((line, lineIndex) => (
@@ -112,14 +130,14 @@ const Workspace: React.FC<WorkspaceProps> = ({
           <span>Add Line</span>
         </Button>
         <Button 
-          onClick={onUndo}
+          onClick={handleUndo}
           className="function-button"
           aria-label="Undo"
         >
           <Undo size={20} />
         </Button>
         <Button 
-          onClick={onRedo}
+          onClick={handleRedo}
           className="function-button"
           aria-label="Redo"
         >

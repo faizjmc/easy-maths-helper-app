@@ -59,5 +59,7 @@ export const useExpressionHistory = (initialPresent: string[][][]) => {
     undo,
     redo,
     recordChange,
+    canUndo: history.past.length > 0,
+    canRedo: history.future.length > 0
   };
 };

@@ -7,6 +7,7 @@ import TabNavigation from './TabNavigation';
 import SymbolGroupNavigation from './SymbolGroupNavigation';
 import { symbolGroups } from '../data/symbolGroups';
 import { useExpressionHistory } from '../hooks/useExpressionHistory';
+import { toast } from '../hooks/use-toast';
 
 const MathScribe: React.FC = () => {
   // State for handling tabs
@@ -14,7 +15,7 @@ const MathScribe: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
   
   // Initialize expression history
-  const { expressions, undo, redo, recordChange } = useExpressionHistory([
+  const { expressions, undo, redo, recordChange, canUndo, canRedo } = useExpressionHistory([
     [['']],  // Tab 0, initial empty expression
   ]);
   
@@ -56,11 +57,27 @@ const MathScribe: React.FC = () => {
   };
 
   const handleUndo = () => {
-    undo();
+    if (canUndo) {
+      undo();
+    } else {
+      toast({
+        title: "Cannot Undo",
+        description: "No more actions to undo",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleRedo = () => {
-    redo();
+    if (canRedo) {
+      redo();
+    } else {
+      toast({
+        title: "Cannot Redo",
+        description: "No more actions to redo",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
