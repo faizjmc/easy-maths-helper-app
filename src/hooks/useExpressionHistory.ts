@@ -2,9 +2,9 @@
 import { useState } from 'react';
 
 type HistoryState = {
-  past: string[][][];
+  past: string[][][][];
   present: string[][][];
-  future: string[][][];
+  future: string[][][][];
 };
 
 export const useExpressionHistory = (initialPresent: string[][][]) => {
