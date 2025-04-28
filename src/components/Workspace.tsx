@@ -1,5 +1,6 @@
+
 import React, { useState, useRef } from 'react';
-import { Plus, Undo, Redo, Delete, Trash2 } from 'lucide-react';
+import { Plus, Undo, Redo, Trash2 } from 'lucide-react';
 import { Button } from './ui/button';
 
 type WorkspaceProps = {
@@ -128,7 +129,7 @@ const Workspace: React.FC<WorkspaceProps> = ({ activeTabId, expressions, onExpre
           className="function-button"
           aria-label="Delete"
         >
-          <Delete size={20} />
+          <Trash2 size={20} />
         </Button>
       </div>
       

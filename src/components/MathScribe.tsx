@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Workspace from './Workspace';
 import SymbolGroup from './SymbolGroup';
@@ -52,6 +53,14 @@ const MathScribe: React.FC = () => {
   
   const handleExpressionsChange = (tabId: number, newExpressions: string[][][]) => {
     recordChange(newExpressions);
+  };
+
+  const handleUndo = () => {
+    undo();
+  };
+
+  const handleRedo = () => {
+    redo();
   };
 
   return (
