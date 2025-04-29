@@ -1,5 +1,5 @@
 
-import { useState, useRef } from 'react';
+import { useState, useRef, KeyboardEvent } from 'react';
 import { useToast } from './use-toast';
 
 type UseWorkspaceProps = {
@@ -147,6 +147,96 @@ export const useWorkspace = ({
     });
   };
 
+  // New function to handle text input
+  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    // Handle Enter key to add a new line
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const currentExpressions = [...expressions];
+      const currentLine = [...currentExpressions[activeTabId][cursorPosition.line]];
+      const newLine = currentLine.slice(cursorPosition.char);
+      currentExpressions[activeTabId][cursorPosition.line] = currentLine.slice(0, cursorPosition.char);
+      currentExpressions[activeTabId].splice(cursorPosition.line + 1, 0, newLine);
+      
+      onExpressionsChange(activeTabId, currentExpressions);
+      setCursorPosition({ line: cursorPosition.line + 1, char: 0 });
+      return;
+    }
+
+    // Handle Backspace key
+    if (e.key === 'Backspace') {
+      e.preventDefault();
+      handleBackspace();
+      return;
+    }
+
+    // Handle Delete key
+    if (e.key === 'Delete') {
+      e.preventDefault();
+      handleDelete();
+      return;
+    }
+
+    // Handle arrow keys
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      if (cursorPosition.char > 0) {
+        setCursorPosition({ ...cursorPosition, char: cursorPosition.char - 1 });
+      } else if (cursorPosition.line > 0) {
+        const previousLine = expressions[activeTabId][cursorPosition.line - 1];
+        setCursorPosition({ line: cursorPosition.line - 1, char: previousLine.length });
+      }
+      return;
+    }
+
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      const currentLine = expressions[activeTabId][cursorPosition.line];
+      if (cursorPosition.char < currentLine.length) {
+        setCursorPosition({ ...cursorPosition, char: cursorPosition.char + 1 });
+      } else if (cursorPosition.line < expressions[activeTabId].length - 1) {
+        setCursorPosition({ line: cursorPosition.line + 1, char: 0 });
+      }
+      return;
+    }
+
+    if (e.key === 'ArrowUp' && cursorPosition.line > 0) {
+      e.preventDefault();
+      const targetLine = expressions[activeTabId][cursorPosition.line - 1];
+      const newChar = Math.min(cursorPosition.char, targetLine.length);
+      setCursorPosition({ line: cursorPosition.line - 1, char: newChar });
+      return;
+    }
+
+    if (e.key === 'ArrowDown' && cursorPosition.line < expressions[activeTabId].length - 1) {
+      e.preventDefault();
+      const targetLine = expressions[activeTabId][cursorPosition.line + 1];
+      const newChar = Math.min(cursorPosition.char, targetLine.length);
+      setCursorPosition({ line: cursorPosition.line + 1, char: newChar });
+      return;
+    }
+
+    // Handle regular text input (single character)
+    if (e.key.length === 1) {
+      e.preventDefault();
+      
+      const currentExpressions = [...expressions];
+      if (!currentExpressions[activeTabId]) {
+        currentExpressions[activeTabId] = [['']];
+      }
+      
+      const currentLine = currentExpressions[activeTabId][cursorPosition.line];
+      
+      currentLine.splice(cursorPosition.char, 0, e.key);
+      onExpressionsChange(activeTabId, currentExpressions);
+      
+      setCursorPosition({
+        ...cursorPosition,
+        char: cursorPosition.char + 1
+      });
+    }
+  };
+
   const handleFocus = () => {
     if (workspaceRef.current) {
       workspaceRef.current.focus();
@@ -180,6 +270,7 @@ export const useWorkspace = ({
     handleCopy,
     handlePaste,
     handleFocus,
+    handleKeyDown,
     handleUndo,
     handleRedo
   };

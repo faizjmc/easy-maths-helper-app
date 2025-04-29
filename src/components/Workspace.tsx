@@ -30,6 +30,7 @@ const Workspace: React.FC<WorkspaceProps> = ({
     handleCopy,
     handlePaste,
     handleFocus,
+    handleKeyDown,
     handleUndo,
     handleRedo
   } = useWorkspace({
@@ -59,6 +60,7 @@ const Workspace: React.FC<WorkspaceProps> = ({
         activeTabId={activeTabId}
         cursorPosition={cursorPosition}
         onFocus={handleFocus}
+        onKeyDown={handleKeyDown}
       />
     </div>
   );

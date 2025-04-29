@@ -28,7 +28,7 @@ const WorkspaceToolbar: React.FC<WorkspaceToolbarProps> = ({
     <div className="flex justify-end space-x-2 mb-4">
       <Button
         onClick={onAddLine}
-        className="function-button bg-mathPurple/10 hover:bg-mathPurple/20 flex items-center gap-1"
+        className="function-button"
         aria-label="Add new line"
       >
         <Plus size={20} />

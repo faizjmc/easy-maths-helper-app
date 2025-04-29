@@ -1,15 +1,16 @@
 
-import React, { forwardRef } from 'react';
+import React, { forwardRef, KeyboardEvent } from 'react';
 
 type WorkspaceEditorProps = {
   expressions: string[][][];
   activeTabId: number;
   cursorPosition: { line: number; char: number };
   onFocus: () => void;
+  onKeyDown: (e: KeyboardEvent<HTMLDivElement>) => void;
 };
 
 const WorkspaceEditor = forwardRef<HTMLDivElement, WorkspaceEditorProps>(
-  ({ expressions, activeTabId, cursorPosition, onFocus }, ref) => {
+  ({ expressions, activeTabId, cursorPosition, onFocus, onKeyDown }, ref) => {
     const renderExpressions = () => {
       return expressions[activeTabId]?.map((line, lineIndex) => (
         <div 
@@ -37,6 +38,7 @@ const WorkspaceEditor = forwardRef<HTMLDivElement, WorkspaceEditorProps>(
         className="workspace-area p-2 min-h-[150px] border border-dashed border-mathPurple/50 rounded-lg"
         tabIndex={0}
         onClick={onFocus}
+        onKeyDown={onKeyDown}
         role="textbox"
         aria-label="Math workspace"
       >
