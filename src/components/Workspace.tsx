@@ -46,16 +46,7 @@ const Workspace: React.FC<WorkspaceProps> = ({
 
   return (
     <div className="border-2 border-mathPurple rounded-lg p-4 mb-4 bg-white h-[250px] md:h-[300px] overflow-auto">
-      <WorkspaceToolbar
-        onAddLine={handleAddLine}
-        onUndo={handleUndo}
-        onRedo={handleRedo}
-        onBackspace={handleBackspace}
-        onDelete={handleDelete}
-        onCut={handleCut}
-        onCopy={handleCopy}
-        onPaste={handlePaste}
-      />
+      <WorkspaceToolbar />
       
       <WorkspaceEditor
         ref={workspaceRef}
