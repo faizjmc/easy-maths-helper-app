@@ -1,6 +1,5 @@
-
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Plus, Undo, Redo, Trash2, DeleteLeft, Copy, Clipboard, Scissors } from 'lucide-react';
+import { Plus, Undo, Redo, Trash2, Trash, Copy, Clipboard, Scissors } from 'lucide-react';
 import { Button } from './ui/button';
 import { useToast } from '../hooks/use-toast';
 
@@ -33,7 +32,6 @@ const Workspace: React.FC<WorkspaceProps> = ({
     }
     onExpressionsChange(activeTabId, newExpressions);
     
-    // Set cursor to beginning of new line
     const newLine = newExpressions[activeTabId].length - 1;
     setCursorPosition({ line: newLine, char: 0 });
   };
@@ -43,11 +41,9 @@ const Workspace: React.FC<WorkspaceProps> = ({
     const currentLine = currentExpressions[activeTabId][cursorPosition.line];
     
     if (cursorPosition.char > 0) {
-      // Remove character at current position
       currentLine.splice(cursorPosition.char - 1, 1);
       setCursorPosition({ ...cursorPosition, char: cursorPosition.char - 1 });
     } else if (cursorPosition.line > 0) {
-      // Merge with previous line if at start of line
       const previousLine = currentExpressions[activeTabId][cursorPosition.line - 1];
       const newPosition = previousLine.length;
       previousLine.push(...currentLine);
@@ -63,10 +59,8 @@ const Workspace: React.FC<WorkspaceProps> = ({
     const currentLine = currentExpressions[activeTabId][cursorPosition.line];
     
     if (cursorPosition.char < currentLine.length) {
-      // Remove character after cursor
       currentLine.splice(cursorPosition.char, 1);
     } else if (cursorPosition.line < currentExpressions[activeTabId].length - 1) {
-      // Merge with next line if at end of line
       const nextLine = currentExpressions[activeTabId][cursorPosition.line + 1];
       currentLine.push(...nextLine);
       currentExpressions[activeTabId].splice(cursorPosition.line + 1, 1);
@@ -80,11 +74,9 @@ const Workspace: React.FC<WorkspaceProps> = ({
     const currentLine = currentExpressions[activeTabId][cursorPosition.line];
     
     if (currentLine && currentLine.length > 0) {
-      // Cut current line
       const cutContent = [...currentLine];
       setClipboard(cutContent);
       
-      // Remove line
       if (currentExpressions[activeTabId].length > 1) {
         currentExpressions[activeTabId].splice(cursorPosition.line, 1);
         setCursorPosition({ 
@@ -92,7 +84,6 @@ const Workspace: React.FC<WorkspaceProps> = ({
           char: 0 
         });
       } else {
-        // If it's the only line, just clear it
         currentExpressions[activeTabId][0] = [''];
         setCursorPosition({ line: 0, char: 0 });
       }
@@ -132,7 +123,6 @@ const Workspace: React.FC<WorkspaceProps> = ({
     const currentExpressions = [...expressions];
     const currentLine = [...currentExpressions[activeTabId][cursorPosition.line]];
     
-    // Insert clipboard content at cursor position
     const newLine = [
       ...currentLine.slice(0, cursorPosition.char),
       ...clipboard,
@@ -142,7 +132,6 @@ const Workspace: React.FC<WorkspaceProps> = ({
     currentExpressions[activeTabId][cursorPosition.line] = newLine;
     onExpressionsChange(activeTabId, currentExpressions);
     
-    // Move cursor after pasted content
     setCursorPosition({
       ...cursorPosition,
       char: cursorPosition.char + clipboard.length
@@ -176,7 +165,6 @@ const Workspace: React.FC<WorkspaceProps> = ({
     });
   };
 
-  // Helper function to render cursor at current position
   const renderExpressions = () => {
     return expressions[activeTabId]?.map((line, lineIndex) => (
       <div 
@@ -228,7 +216,7 @@ const Workspace: React.FC<WorkspaceProps> = ({
           className="function-button"
           aria-label="Backspace"
         >
-          <DeleteLeft size={20} />
+          <Trash size={20} />
         </Button>
         <Button
           onClick={handleDelete}
