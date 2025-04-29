@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Plus, Undo, Redo, Trash2, Backspace, Copy, Clipboard, Scissors } from 'lucide-react';
+import { Plus, Undo, Redo, Trash2, DeleteLeft, Copy, Clipboard, Scissors } from 'lucide-react';
 import { Button } from './ui/button';
 import { useToast } from '../hooks/use-toast';
 
@@ -228,7 +228,7 @@ const Workspace: React.FC<WorkspaceProps> = ({
           className="function-button"
           aria-label="Backspace"
         >
-          <Backspace size={20} />
+          <DeleteLeft size={20} />
         </Button>
         <Button
           onClick={handleDelete}
