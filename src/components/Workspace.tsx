@@ -1,6 +1,6 @@
 
-import React, { useState, useRef, useEffect } from 'react';
-import { Plus, Undo, Redo, Trash2 } from 'lucide-react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { Plus, Undo, Redo, Trash2, Backspace, Copy, Clipboard, Scissors } from 'lucide-react';
 import { Button } from './ui/button';
 import { useToast } from '../hooks/use-toast';
 
@@ -20,6 +20,7 @@ const Workspace: React.FC<WorkspaceProps> = ({
   onRedo
 }) => {
   const [cursorPosition, setCursorPosition] = useState<{ line: number; char: number }>({ line: 0, char: 0 });
+  const [clipboard, setClipboard] = useState<string[]>([]);
   const workspaceRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -74,6 +75,85 @@ const Workspace: React.FC<WorkspaceProps> = ({
     onExpressionsChange(activeTabId, currentExpressions);
   };
 
+  const handleCut = () => {
+    const currentExpressions = [...expressions];
+    const currentLine = currentExpressions[activeTabId][cursorPosition.line];
+    
+    if (currentLine && currentLine.length > 0) {
+      // Cut current line
+      const cutContent = [...currentLine];
+      setClipboard(cutContent);
+      
+      // Remove line
+      if (currentExpressions[activeTabId].length > 1) {
+        currentExpressions[activeTabId].splice(cursorPosition.line, 1);
+        setCursorPosition({ 
+          line: Math.min(cursorPosition.line, currentExpressions[activeTabId].length - 1), 
+          char: 0 
+        });
+      } else {
+        // If it's the only line, just clear it
+        currentExpressions[activeTabId][0] = [''];
+        setCursorPosition({ line: 0, char: 0 });
+      }
+      
+      onExpressionsChange(activeTabId, currentExpressions);
+      
+      toast({
+        title: "Cut",
+        description: "Content cut to clipboard",
+      });
+    }
+  };
+  
+  const handleCopy = () => {
+    const currentLine = expressions[activeTabId][cursorPosition.line];
+    
+    if (currentLine && currentLine.length > 0) {
+      setClipboard([...currentLine]);
+      
+      toast({
+        title: "Copied",
+        description: "Content copied to clipboard",
+      });
+    }
+  };
+  
+  const handlePaste = () => {
+    if (clipboard.length === 0) {
+      toast({
+        title: "Nothing to paste",
+        description: "Clipboard is empty",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const currentExpressions = [...expressions];
+    const currentLine = [...currentExpressions[activeTabId][cursorPosition.line]];
+    
+    // Insert clipboard content at cursor position
+    const newLine = [
+      ...currentLine.slice(0, cursorPosition.char),
+      ...clipboard,
+      ...currentLine.slice(cursorPosition.char)
+    ];
+    
+    currentExpressions[activeTabId][cursorPosition.line] = newLine;
+    onExpressionsChange(activeTabId, currentExpressions);
+    
+    // Move cursor after pasted content
+    setCursorPosition({
+      ...cursorPosition,
+      char: cursorPosition.char + clipboard.length
+    });
+    
+    toast({
+      title: "Pasted",
+      description: "Content pasted from clipboard",
+    });
+  };
+
   const handleFocus = () => {
     if (workspaceRef.current) {
       workspaceRef.current.focus();
@@ -106,11 +186,11 @@ const Workspace: React.FC<WorkspaceProps> = ({
         {line.map((expr, charIndex) => (
           <React.Fragment key={charIndex}>
             {cursorPosition.line === lineIndex && cursorPosition.char === charIndex && (
-              <span className="h-6 w-0.5 bg-mathPurple animate-pulse mx-0.5"></span>
+              <span className="h-6 w-0.5 bg-mathPurple animate-pulse mx-0.5 font-bold" style={{ width: '3px' }}></span>
             )}
             <span>{expr}</span>
             {charIndex === line.length - 1 && cursorPosition.line === lineIndex && cursorPosition.char === line.length && (
-              <span className="h-6 w-0.5 bg-mathPurple animate-pulse mx-0.5"></span>
+              <span className="h-6 w-0.5 bg-mathPurple animate-pulse mx-0.5 font-bold" style={{ width: '3px' }}></span>
             )}
           </React.Fragment>
         ))}
@@ -123,7 +203,7 @@ const Workspace: React.FC<WorkspaceProps> = ({
       <div className="flex justify-end space-x-2 mb-4">
         <Button
           onClick={handleAddLine}
-          className="function-button bg-mathPurple/10 flex items-center gap-1"
+          className="function-button bg-mathPurple/10 hover:bg-mathPurple/20 flex items-center gap-1"
           aria-label="Add new line"
         >
           <Plus size={20} />
@@ -148,7 +228,7 @@ const Workspace: React.FC<WorkspaceProps> = ({
           className="function-button"
           aria-label="Backspace"
         >
-          <Trash2 size={20} />
+          <Backspace size={20} />
         </Button>
         <Button
           onClick={handleDelete}
@@ -156,6 +236,27 @@ const Workspace: React.FC<WorkspaceProps> = ({
           aria-label="Delete"
         >
           <Trash2 size={20} />
+        </Button>
+        <Button
+          onClick={handleCut}
+          className="function-button"
+          aria-label="Cut"
+        >
+          <Scissors size={20} />
+        </Button>
+        <Button
+          onClick={handleCopy}
+          className="function-button"
+          aria-label="Copy"
+        >
+          <Copy size={20} />
+        </Button>
+        <Button
+          onClick={handlePaste}
+          className="function-button"
+          aria-label="Paste"
+        >
+          <Clipboard size={20} />
         </Button>
       </div>
       

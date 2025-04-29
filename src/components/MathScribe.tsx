@@ -52,6 +52,18 @@ const MathScribe: React.FC = () => {
     setActiveTab(tabId);
   };
   
+  const handleRenameTab = (tabId: number, newName: string) => {
+    const updatedTabs = tabs.map(tab => 
+      tab.id === tabId ? { ...tab, name: newName } : tab
+    );
+    setTabs(updatedTabs);
+    
+    toast({
+      title: "Tab Renamed",
+      description: `Tab renamed to "${newName}"`,
+    });
+  };
+  
   const handleExpressionsChange = (tabId: number, newExpressions: string[][][]) => {
     recordChange(newExpressions);
   };
@@ -92,6 +104,7 @@ const MathScribe: React.FC = () => {
         activeTab={activeTab}
         onTabSelect={handleTabSelect}
         onAddTab={handleAddTab}
+        onRenameTab={handleRenameTab}
       />
       
       <Workspace 
