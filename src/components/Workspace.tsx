@@ -10,6 +10,7 @@ type WorkspaceProps = {
   onExpressionsChange: (tabId: number, expressions: string[][][]) => void;
   onUndo: () => void;
   onRedo: () => void;
+  onCursorChange: (position: {line: number, char: number}) => void;
 };
 
 const Workspace: React.FC<WorkspaceProps> = ({ 
@@ -17,7 +18,8 @@ const Workspace: React.FC<WorkspaceProps> = ({
   expressions, 
   onExpressionsChange,
   onUndo,
-  onRedo
+  onRedo,
+  onCursorChange
 }) => {
   const {
     cursorPosition,
@@ -38,7 +40,8 @@ const Workspace: React.FC<WorkspaceProps> = ({
     expressions,
     onExpressionsChange,
     onUndo,
-    onRedo
+    onRedo,
+    onCursorChange
   });
 
   return (

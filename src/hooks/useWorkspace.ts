@@ -1,5 +1,5 @@
 
-import { useState, useRef, KeyboardEvent } from 'react';
+import { useState, useRef, KeyboardEvent, useEffect } from 'react';
 import { useToast } from './use-toast';
 
 type UseWorkspaceProps = {
@@ -8,6 +8,7 @@ type UseWorkspaceProps = {
   onExpressionsChange: (tabId: number, expressions: string[][][]) => void;
   onUndo: () => void;
   onRedo: () => void;
+  onCursorChange?: (position: {line: number, char: number}) => void;
 };
 
 type CursorPosition = {
@@ -20,12 +21,20 @@ export const useWorkspace = ({
   expressions,
   onExpressionsChange,
   onUndo,
-  onRedo
+  onRedo,
+  onCursorChange
 }: UseWorkspaceProps) => {
   const [cursorPosition, setCursorPosition] = useState<CursorPosition>({ line: 0, char: 0 });
   const [clipboard, setClipboard] = useState<string[]>([]);
   const workspaceRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  // Sync cursor position with parent component
+  useEffect(() => {
+    if (onCursorChange) {
+      onCursorChange(cursorPosition);
+    }
+  }, [cursorPosition, onCursorChange]);
 
   const handleAddLine = () => {
     const newExpressions = [...expressions];
@@ -37,7 +46,15 @@ export const useWorkspace = ({
     onExpressionsChange(activeTabId, newExpressions);
     
     const newLine = newExpressions[activeTabId].length - 1;
-    setCursorPosition({ line: newLine, char: 0 });
+    updateCursorPosition({ line: newLine, char: 0 });
+  };
+
+  // Helper function to update cursor position and sync with parent
+  const updateCursorPosition = (newPosition: CursorPosition) => {
+    setCursorPosition(newPosition);
+    if (onCursorChange) {
+      onCursorChange(newPosition);
+    }
   };
 
   const handleBackspace = () => {
@@ -46,13 +63,13 @@ export const useWorkspace = ({
     
     if (cursorPosition.char > 0) {
       currentLine.splice(cursorPosition.char - 1, 1);
-      setCursorPosition({ ...cursorPosition, char: cursorPosition.char - 1 });
+      updateCursorPosition({ ...cursorPosition, char: cursorPosition.char - 1 });
     } else if (cursorPosition.line > 0) {
       const previousLine = currentExpressions[activeTabId][cursorPosition.line - 1];
       const newPosition = previousLine.length;
       previousLine.push(...currentLine);
       currentExpressions[activeTabId].splice(cursorPosition.line, 1);
-      setCursorPosition({ line: cursorPosition.line - 1, char: newPosition });
+      updateCursorPosition({ line: cursorPosition.line - 1, char: newPosition });
     }
     
     onExpressionsChange(activeTabId, currentExpressions);
@@ -83,13 +100,13 @@ export const useWorkspace = ({
       
       if (currentExpressions[activeTabId].length > 1) {
         currentExpressions[activeTabId].splice(cursorPosition.line, 1);
-        setCursorPosition({ 
+        updateCursorPosition({ 
           line: Math.min(cursorPosition.line, currentExpressions[activeTabId].length - 1), 
           char: 0 
         });
       } else {
         currentExpressions[activeTabId][0] = [''];
-        setCursorPosition({ line: 0, char: 0 });
+        updateCursorPosition({ line: 0, char: 0 });
       }
       
       onExpressionsChange(activeTabId, currentExpressions);
@@ -136,7 +153,7 @@ export const useWorkspace = ({
     currentExpressions[activeTabId][cursorPosition.line] = newLine;
     onExpressionsChange(activeTabId, currentExpressions);
     
-    setCursorPosition({
+    updateCursorPosition({
       ...cursorPosition,
       char: cursorPosition.char + clipboard.length
     });
@@ -159,7 +176,7 @@ export const useWorkspace = ({
       currentExpressions[activeTabId].splice(cursorPosition.line + 1, 0, newLine);
       
       onExpressionsChange(activeTabId, currentExpressions);
-      setCursorPosition({ line: cursorPosition.line + 1, char: 0 });
+      updateCursorPosition({ line: cursorPosition.line + 1, char: 0 });
       return;
     }
 
@@ -181,10 +198,10 @@ export const useWorkspace = ({
     if (e.key === 'ArrowLeft') {
       e.preventDefault();
       if (cursorPosition.char > 0) {
-        setCursorPosition({ ...cursorPosition, char: cursorPosition.char - 1 });
+        updateCursorPosition({ ...cursorPosition, char: cursorPosition.char - 1 });
       } else if (cursorPosition.line > 0) {
         const previousLine = expressions[activeTabId][cursorPosition.line - 1];
-        setCursorPosition({ line: cursorPosition.line - 1, char: previousLine.length });
+        updateCursorPosition({ line: cursorPosition.line - 1, char: previousLine.length });
       }
       return;
     }
@@ -193,9 +210,9 @@ export const useWorkspace = ({
       e.preventDefault();
       const currentLine = expressions[activeTabId][cursorPosition.line];
       if (cursorPosition.char < currentLine.length) {
-        setCursorPosition({ ...cursorPosition, char: cursorPosition.char + 1 });
+        updateCursorPosition({ ...cursorPosition, char: cursorPosition.char + 1 });
       } else if (cursorPosition.line < expressions[activeTabId].length - 1) {
-        setCursorPosition({ line: cursorPosition.line + 1, char: 0 });
+        updateCursorPosition({ line: cursorPosition.line + 1, char: 0 });
       }
       return;
     }
@@ -204,7 +221,7 @@ export const useWorkspace = ({
       e.preventDefault();
       const targetLine = expressions[activeTabId][cursorPosition.line - 1];
       const newChar = Math.min(cursorPosition.char, targetLine.length);
-      setCursorPosition({ line: cursorPosition.line - 1, char: newChar });
+      updateCursorPosition({ line: cursorPosition.line - 1, char: newChar });
       return;
     }
 
@@ -212,7 +229,7 @@ export const useWorkspace = ({
       e.preventDefault();
       const targetLine = expressions[activeTabId][cursorPosition.line + 1];
       const newChar = Math.min(cursorPosition.char, targetLine.length);
-      setCursorPosition({ line: cursorPosition.line + 1, char: newChar });
+      updateCursorPosition({ line: cursorPosition.line + 1, char: newChar });
       return;
     }
 
@@ -230,7 +247,7 @@ export const useWorkspace = ({
       currentLine.splice(cursorPosition.char, 0, e.key);
       onExpressionsChange(activeTabId, currentExpressions);
       
-      setCursorPosition({
+      updateCursorPosition({
         ...cursorPosition,
         char: cursorPosition.char + 1
       });

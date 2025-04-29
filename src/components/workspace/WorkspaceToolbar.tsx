@@ -1,7 +1,15 @@
 
 import React from 'react';
-import { Plus, Undo, Redo, Trash2, Trash, Copy, Clipboard, Scissors } from 'lucide-react';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
+import { 
+  ArrowLeft, 
+  ArrowRight, 
+  Scissors, 
+  Copy, 
+  Clipboard, 
+  TextCursor,
+  Trash
+} from 'lucide-react';
 
 type WorkspaceToolbarProps = {
   onAddLine: () => void;
@@ -25,63 +33,35 @@ const WorkspaceToolbar: React.FC<WorkspaceToolbarProps> = ({
   onPaste
 }) => {
   return (
-    <div className="flex justify-end space-x-2 mb-4">
+    <div className="flex flex-wrap gap-1 mb-2 items-center">
       <Button
+        variant="outline" 
+        size="sm" 
         onClick={onAddLine}
-        className="function-button"
-        aria-label="Add new line"
+        className="text-xs"
       >
-        <Plus size={20} />
-        <span>Add Line</span>
+        <TextCursor className="h-4 w-4 mr-1" /> Add Line
       </Button>
-      <Button 
-        onClick={onUndo}
-        className="function-button"
-        aria-label="Undo"
-      >
-        <Undo size={20} />
+      <Button variant="outline" size="sm" onClick={onUndo}>
+        <ArrowLeft className="h-4 w-4" />
       </Button>
-      <Button 
-        onClick={onRedo}
-        className="function-button"
-        aria-label="Redo"
-      >
-        <Redo size={20} />
+      <Button variant="outline" size="sm" onClick={onRedo}>
+        <ArrowRight className="h-4 w-4" />
       </Button>
-      <Button
-        onClick={onBackspace}
-        className="function-button"
-        aria-label="Backspace"
-      >
-        <Trash size={20} />
+      <Button variant="outline" size="sm" onClick={onBackspace}>
+        Backspace
       </Button>
-      <Button
-        onClick={onDelete}
-        className="function-button"
-        aria-label="Delete"
-      >
-        <Trash2 size={20} />
+      <Button variant="outline" size="sm" onClick={onDelete}>
+        <Trash className="h-4 w-4" />
       </Button>
-      <Button
-        onClick={onCut}
-        className="function-button"
-        aria-label="Cut"
-      >
-        <Scissors size={20} />
+      <Button variant="outline" size="sm" onClick={onCut}>
+        <Scissors className="h-4 w-4" />
       </Button>
-      <Button
-        onClick={onCopy}
-        className="function-button"
-        aria-label="Copy"
-      >
-        <Copy size={20} />
+      <Button variant="outline" size="sm" onClick={onCopy}>
+        <Copy className="h-4 w-4" />
       </Button>
-      <Button
-        onClick={onPaste}
-        className="function-button"
-        aria-label="Paste"
-      >
-        <Clipboard size={20} />
+      <Button variant="outline" size="sm" onClick={onPaste}>
+        <Clipboard className="h-4 w-4" />
       </Button>
     </div>
   );

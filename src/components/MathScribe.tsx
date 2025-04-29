@@ -27,16 +27,28 @@ const MathScribe: React.FC = () => {
   // Symbol group navigation
   const [activeGroup, setActiveGroup] = useState('numbers');
   
+  // Track cursor position for symbol insertion
+  const [cursorPosition, setCursorPosition] = useState({ line: 0, char: 0 });
+  
   // Handle symbol selection
   const handleSymbolSelect = (symbol: string) => {
     const newExpressions = [...expressions];
     if (!newExpressions[activeTab]) {
       newExpressions[activeTab] = [['']];
     }
-    const targetTabExpressions = newExpressions[activeTab];
-    const lastLineIndex = targetTabExpressions.length - 1;
-    targetTabExpressions[lastLineIndex].push(symbol);
+    
+    const currentLine = newExpressions[activeTab][cursorPosition.line];
+    
+    // Insert the symbol at the current cursor position
+    currentLine.splice(cursorPosition.char, 0, symbol);
+    
     recordChange(newExpressions);
+    
+    // Update cursor position to move after inserted symbol
+    setCursorPosition({
+      ...cursorPosition,
+      char: cursorPosition.char + 1
+    });
   };
   
   const handleAddTab = () => {
@@ -66,6 +78,10 @@ const MathScribe: React.FC = () => {
   
   const handleExpressionsChange = (tabId: number, newExpressions: string[][][]) => {
     recordChange(newExpressions);
+  };
+
+  const handleCursorChange = (position: {line: number, char: number}) => {
+    setCursorPosition(position);
   };
 
   const handleUndo = () => {
@@ -113,6 +129,7 @@ const MathScribe: React.FC = () => {
         onExpressionsChange={handleExpressionsChange} 
         onUndo={handleUndo}
         onRedo={handleRedo}
+        onCursorChange={handleCursorChange} 
       />
       
       <SymbolGroupNavigation
