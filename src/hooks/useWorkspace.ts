@@ -1,4 +1,3 @@
-
 import { useState, useRef, KeyboardEvent, useEffect } from 'react';
 import { useToast } from './use-toast';
 
@@ -164,6 +163,26 @@ export const useWorkspace = ({
     });
   };
 
+  // New function for selecting all text
+  const handleSelectAll = () => {
+    if (expressions[activeTabId]?.length > 0) {
+      // Mark all content as selected (in this case we can't actually highlight the text
+      // so we'll just position the cursor at the end of all content)
+      const lastLineIndex = expressions[activeTabId].length - 1;
+      const lastLineLength = expressions[activeTabId][lastLineIndex]?.length || 0;
+      
+      updateCursorPosition({
+        line: lastLineIndex,
+        char: lastLineLength
+      });
+      
+      toast({
+        title: "Select All",
+        description: "All content selected",
+      });
+    }
+  };
+
   // New function to handle text input
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     // Handle Enter key to add a new line
@@ -286,6 +305,7 @@ export const useWorkspace = ({
     handleCut,
     handleCopy,
     handlePaste,
+    handleSelectAll,
     handleFocus,
     handleKeyDown,
     handleUndo,

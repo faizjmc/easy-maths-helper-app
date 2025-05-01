@@ -1,5 +1,12 @@
 
 import React, { forwardRef, KeyboardEvent } from 'react';
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 
 type WorkspaceEditorProps = {
   expressions: string[][][];
@@ -7,10 +14,14 @@ type WorkspaceEditorProps = {
   cursorPosition: { line: number; char: number };
   onFocus: () => void;
   onKeyDown: (e: KeyboardEvent<HTMLDivElement>) => void;
+  onCut?: () => void;
+  onCopy?: () => void;
+  onPaste?: () => void;
+  onSelectAll?: () => void;
 };
 
 const WorkspaceEditor = forwardRef<HTMLDivElement, WorkspaceEditorProps>(
-  ({ expressions, activeTabId, cursorPosition, onFocus, onKeyDown }, ref) => {
+  ({ expressions, activeTabId, cursorPosition, onFocus, onKeyDown, onCut, onCopy, onPaste, onSelectAll }, ref) => {
     const renderExpressions = () => {
       return expressions[activeTabId]?.map((line, lineIndex) => (
         <div 
@@ -33,17 +44,36 @@ const WorkspaceEditor = forwardRef<HTMLDivElement, WorkspaceEditorProps>(
     };
 
     return (
-      <div 
-        ref={ref}
-        className="workspace-area p-2 min-h-[150px] border border-dashed border-mathPurple/50 rounded-lg"
-        tabIndex={0}
-        onClick={onFocus}
-        onKeyDown={onKeyDown}
-        role="textbox"
-        aria-label="Math workspace"
-      >
-        {renderExpressions()}
-      </div>
+      <ContextMenu>
+        <ContextMenuTrigger>
+          <div 
+            ref={ref}
+            className="workspace-area p-2 min-h-[150px] border border-dashed border-mathPurple/50 rounded-lg"
+            tabIndex={0}
+            onClick={onFocus}
+            onKeyDown={onKeyDown}
+            role="textbox"
+            aria-label="Math workspace"
+          >
+            {renderExpressions()}
+          </div>
+        </ContextMenuTrigger>
+        <ContextMenuContent>
+          <ContextMenuItem onClick={onCut} disabled={!onCut}>
+            Cut
+          </ContextMenuItem>
+          <ContextMenuItem onClick={onCopy} disabled={!onCopy}>
+            Copy
+          </ContextMenuItem>
+          <ContextMenuItem onClick={onPaste} disabled={!onPaste}>
+            Paste
+          </ContextMenuItem>
+          <ContextMenuSeparator />
+          <ContextMenuItem onClick={onSelectAll} disabled={!onSelectAll}>
+            Select All
+          </ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
     );
   }
 );

@@ -31,6 +31,7 @@ const Workspace: React.FC<WorkspaceProps> = ({
     handleCut,
     handleCopy,
     handlePaste,
+    handleSelectAll,
     handleFocus,
     handleKeyDown,
     handleUndo,
@@ -55,6 +56,10 @@ const Workspace: React.FC<WorkspaceProps> = ({
         cursorPosition={cursorPosition}
         onFocus={handleFocus}
         onKeyDown={handleKeyDown}
+        onCut={handleCut}
+        onCopy={handleCopy}
+        onPaste={handlePaste}
+        onSelectAll={handleSelectAll}
       />
     </div>
   );
