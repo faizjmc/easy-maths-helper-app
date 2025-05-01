@@ -42,9 +42,10 @@ const MathScribe: React.FC = () => {
     // Insert the symbol at the current cursor position
     currentLine.splice(cursorPosition.char, 0, symbol);
     
+    // Update expressions state
     recordChange(newExpressions);
     
-    // Update cursor position to move after inserted symbol
+    // Move cursor position after the inserted symbol
     setCursorPosition({
       ...cursorPosition,
       char: cursorPosition.char + 1
