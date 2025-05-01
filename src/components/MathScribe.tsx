@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Workspace from './Workspace';
 import SymbolGroup from './SymbolGroup';
@@ -42,14 +41,17 @@ const MathScribe: React.FC = () => {
     // Insert the symbol at the current cursor position
     currentLine.splice(cursorPosition.char, 0, symbol);
     
-    // Update expressions state
+    // Update expressions state first
     recordChange(newExpressions);
     
-    // Move cursor position after the inserted symbol
-    setCursorPosition({
-      ...cursorPosition,
+    // Then update cursor position after the state has been updated
+    const newCursorPos = {
+      line: cursorPosition.line,
       char: cursorPosition.char + 1
-    });
+    };
+    
+    // Set cursor position to be after the inserted symbol
+    setCursorPosition(newCursorPos);
   };
   
   const handleAddTab = () => {
