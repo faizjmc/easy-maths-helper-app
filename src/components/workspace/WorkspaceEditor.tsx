@@ -25,39 +25,44 @@ const WorkspaceEditor = forwardRef<HTMLDivElement, WorkspaceEditorProps>(
     const renderExpressions = () => {
       const currentTabExpressions = expressions[activeTabId] || [['']];
       
-      return currentTabExpressions.map((line, lineIndex) => (
-        <div 
-          key={lineIndex} 
-          className="min-h-[36px] flex items-center text-2xl mb-2 font-mono relative"
-        >
-          {flatLine.length === 0 && cursorPosition.line === lineIndex && cursorPosition.char === 0 && (
-        <span
-          className="h-6 w-0.5 bg-mathPurple animate-pulse mx-0.5 absolute left-0 font-bold"
-          style={{ width: '3px' }}
-        ></span>
-      )}
+      return currentTabExpressions.map((line, lineIndex) => {
+        // Join the line array into a single string for display
+        const flatLine = line.join('');
+        
+        return (
+          <div 
+            key={lineIndex} 
+            className="min-h-[36px] flex items-center text-2xl mb-2 font-mono relative"
+          >
+            {flatLine.length === 0 && cursorPosition.line === lineIndex && cursorPosition.char === 0 && (
+              <span
+                className="h-6 w-0.5 bg-mathPurple animate-pulse mx-0.5 absolute left-0 font-bold"
+                style={{ width: '3px' }}
+              ></span>
+            )}
 
-      {flatLine.split('').map((char, i) => (
-        <React.Fragment key={`char-${i}`}>
-          <span className="inline-block">{char}</span>
-          {cursorPosition.line === lineIndex && cursorPosition.char === i + 1 && (
-            <span
-              className="h-6 w-0.5 bg-mathPurple animate-pulse mx-0.5 font-bold"
-              style={{ width: '3px' }}
-            ></span>
-          )}
-        </React.Fragment>
-      ))}
+            {flatLine.split('').map((char, i) => (
+              <React.Fragment key={`char-${i}`}>
+                <span className="inline-block">{char}</span>
+                {cursorPosition.line === lineIndex && cursorPosition.char === i + 1 && (
+                  <span
+                    className="h-6 w-0.5 bg-mathPurple animate-pulse mx-0.5 font-bold"
+                    style={{ width: '3px' }}
+                  ></span>
+                )}
+              </React.Fragment>
+            ))}
 
-      {/* Cursor at end of line */}
-      {cursorPosition.line === lineIndex && cursorPosition.char === flatLine.length && (
-        <span
-          className="h-6 w-0.5 bg-mathPurple animate-pulse mx-0.5 font-bold"
-          style={{ width: '3px' }}
-        ></span>
-      )}
-        </div>
-      ));
+            {/* Cursor at end of line */}
+            {cursorPosition.line === lineIndex && cursorPosition.char === flatLine.length && (
+              <span
+                className="h-6 w-0.5 bg-mathPurple animate-pulse mx-0.5 font-bold"
+                style={{ width: '3px' }}
+              ></span>
+            )}
+          </div>
+        );
+      });
     };
 
     return (
