@@ -92,20 +92,22 @@ export const useTextInput = ({
       return;
     }
 
-    // Handle regular text input (single character)
+    // Handle regular text input (single character) - insert at cursor position
     if (e.key.length === 1) {
       e.preventDefault();
       
-      const currentExpressions = [...expressions];
+      const currentExpressions = JSON.parse(JSON.stringify(expressions)); // Deep copy to avoid state mutation issues
       if (!currentExpressions[activeTabId]) {
         currentExpressions[activeTabId] = [['']];
       }
       
       const currentLine = currentExpressions[activeTabId][cursorPosition.line];
       
+      // Insert character at cursor position (left-to-right entry)
       currentLine.splice(cursorPosition.char, 0, e.key);
       onExpressionsChange(activeTabId, currentExpressions);
       
+      // Move cursor one position to the right
       updateCursorPosition({
         ...cursorPosition,
         char: cursorPosition.char + 1
