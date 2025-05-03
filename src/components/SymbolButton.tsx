@@ -20,6 +20,7 @@ const SymbolButton: React.FC<SymbolButtonProps> = ({
   const { toast } = useToast();
   
   const handleClick = () => {
+    // Call the onSymbolSelect function to insert the symbol at cursor position
     onSymbolSelect(symbol);
     
     // Text-to-speech for accessibility
