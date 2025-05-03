@@ -36,12 +36,16 @@ const WorkspaceEditor = forwardRef<HTMLDivElement, WorkspaceEditorProps>(
           
           {line.map((expr, charIndex) => (
             <React.Fragment key={`char-${charIndex}`}>
-              {expr}
+              <span className="inline-block">{expr}</span>
               {cursorPosition.line === lineIndex && cursorPosition.char === charIndex + 1 && (
                 <span className="h-6 w-0.5 bg-mathPurple animate-pulse mx-0.5 font-bold" style={{ width: '3px' }}></span>
               )}
             </React.Fragment>
           ))}
+
+          {cursorPosition.line === lineIndex && cursorPosition.char === line.length && (
+            <span className="h-6 w-0.5 bg-mathPurple animate-pulse mx-0.5 font-bold" style={{ width: '3px' }}></span>
+          )}
         </div>
       ));
     };
