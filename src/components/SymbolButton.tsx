@@ -29,7 +29,8 @@ const SymbolButton: React.FC<SymbolButtonProps> = ({
     }
     
     // Visual feedback via toast for special symbols
-    if (["sin", "cos", "tan", "π", "√", "∞"].includes(symbol)) {
+    if (["sin", "cos", "tan", "π", "√", "∞"].includes(symbol) || 
+        symbol.match(/[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞]/)) {
       toast({
         description: `Added ${label || symbol}`,
         duration: 1500,

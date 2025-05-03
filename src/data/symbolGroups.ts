@@ -18,6 +18,29 @@ export const symbolGroups: SymbolGroups = {
     ],
     color: "bg-mathYellow/30"
   },
+  fractions: {
+    title: "Fractions",
+    symbols: [
+      { symbol: "½", label: "one half" },
+      { symbol: "⅓", label: "one third" },
+      { symbol: "⅔", label: "two thirds" },
+      { symbol: "¼", label: "one quarter" },
+      { symbol: "¾", label: "three quarters" },
+      { symbol: "⅕", label: "one fifth" },
+      { symbol: "⅖", label: "two fifths" },
+      { symbol: "⅗", label: "three fifths" },
+      { symbol: "⅘", label: "four fifths" },
+      { symbol: "⅙", label: "one sixth" },
+      { symbol: "⅚", label: "five sixths" },
+      { symbol: "⅐", label: "one seventh" },
+      { symbol: "⅛", label: "one eighth" },
+      { symbol: "⅜", label: "three eighths" },
+      { symbol: "⅝", label: "five eighths" },
+      { symbol: "⅞", label: "seven eighths" },
+      { symbol: "/", label: "fraction slash" }
+    ],
+    color: "bg-mathRed/30"
+  },
   alphabets: {
     title: "Letters",
     symbols: [
@@ -146,4 +169,3 @@ export const symbolGroups: SymbolGroups = {
     color: "bg-mathYellow/30"
   }
 };
-
