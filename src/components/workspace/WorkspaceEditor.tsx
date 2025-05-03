@@ -23,20 +23,22 @@ type WorkspaceEditorProps = {
 const WorkspaceEditor = forwardRef<HTMLDivElement, WorkspaceEditorProps>(
   ({ expressions, activeTabId, cursorPosition, onFocus, onKeyDown, onCut, onCopy, onPaste, onSelectAll }, ref) => {
     const renderExpressions = () => {
-      return expressions[activeTabId]?.map((line, lineIndex) => (
+      const currentTabExpressions = expressions[activeTabId] || [['']];
+      
+      return currentTabExpressions.map((line, lineIndex) => (
         <div 
           key={lineIndex} 
           className="min-h-[36px] flex items-center text-2xl mb-2 font-mono"
         >
           {line.map((expr, charIndex) => (
             <React.Fragment key={`char-${charIndex}`}>
-              {cursorPosition.line === lineIndex && cursorPosition.char === charIndex && (
+              {expr}
+              {cursorPosition.line === lineIndex && cursorPosition.char === charIndex + 1 && (
                 <span className="h-6 w-0.5 bg-mathPurple animate-pulse mx-0.5 font-bold" style={{ width: '3px' }}></span>
               )}
-              <span>{expr}</span>
             </React.Fragment>
           ))}
-          {cursorPosition.line === lineIndex && cursorPosition.char === line.length && (
+          {cursorPosition.line === lineIndex && cursorPosition.char === 0 && line.length === 0 && (
             <span className="h-6 w-0.5 bg-mathPurple animate-pulse mx-0.5 font-bold" style={{ width: '3px' }}></span>
           )}
         </div>
