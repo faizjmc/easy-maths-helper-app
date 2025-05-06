@@ -36,7 +36,13 @@ const MathScribe: React.FC = () => {
     if (!newExpressions[activeTab]) {
       newExpressions[activeTab] = [['']];
     }
-    
+    expressions, undo, redo, recordChange, canUndo, canRedo
+    console.log('expressions:', expressions);
+    console.log('undo:', undo);
+    console.log('redo:', redo);
+    console.log('recordChange:', recordChange);
+    console.log('canUndo:', canUndo);
+    console.log('canRedo:', canRedo);
     const currentLine = newExpressions[activeTab][cursorPosition.line];
 
     console.log('Before insertion:', cursorPosition);
