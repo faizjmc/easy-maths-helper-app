@@ -84,6 +84,7 @@ const MathScribe: React.FC = () => {
   
   const handleExpressionsChange = (tabId: number, newExpressions: string[][][]) => {
     recordChange(newExpressions);
+    console.log('handleExpressionsChange:', newExpressions);
   };
 
   const handleCursorChange = (position: {line: number, char: number}) => {
