@@ -54,7 +54,7 @@ const MathScribe: React.FC = () => {
        
     // Update cursor position
     setCursorPosition(newCursorPos);
-    console.log('After insertion:', cursorPosition.char);
+    console.log('After insertion:', newCursorPos.char);
   };
   
   const handleAddTab = () => {
