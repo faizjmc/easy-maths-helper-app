@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Workspace from './Workspace';
 import SymbolGroup from './SymbolGroup';
@@ -31,7 +32,7 @@ const MathScribe: React.FC = () => {
   
   // Handle symbol selection
   const handleSymbolSelect = (symbol: string) => {
-    const newExpressions = [...expressions];
+    const newExpressions = JSON.parse(JSON.stringify(expressions)); // Deep copy to avoid state mutation
     if (!newExpressions[activeTab]) {
       newExpressions[activeTab] = [['']];
     }
