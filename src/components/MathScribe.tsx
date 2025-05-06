@@ -39,7 +39,7 @@ const MathScribe: React.FC = () => {
     
     const currentLine = newExpressions[activeTab][cursorPosition.line];
 
-    console.log('Before insertion:', cursorPosition.char);
+    console.log('Before insertion:', cursorPosition);
     // Insert the symbol at the current cursor position
     currentLine.splice(cursorPosition.char, 0, symbol);
     
@@ -54,7 +54,7 @@ const MathScribe: React.FC = () => {
        
     // Update cursor position
     setCursorPosition(newCursorPos);
-    console.log('After insertion:', newCursorPos.char);
+    console.log('After insertion:', newCursorPos);
   };
   
   const handleAddTab = () => {
