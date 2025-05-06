@@ -34,7 +34,7 @@ const WorkspaceEditor = forwardRef<HTMLDivElement, WorkspaceEditorProps>(
             key={lineIndex} 
             className="min-h-[36px] flex items-center text-2xl mb-2 font-mono relative"
           >
-            {/* Cursor at beginning of line */}
+            {/* Only display cursor at beginning of line if this is the current position */}
             {cursorPosition.line === lineIndex && cursorPosition.char === 0 && (
               <span
                 className="h-6 w-0.5 bg-mathPurple animate-pulse mr-0.5 font-bold"
@@ -46,6 +46,7 @@ const WorkspaceEditor = forwardRef<HTMLDivElement, WorkspaceEditorProps>(
             {flatLine.split('').map((char, i) => (
               <React.Fragment key={`char-${i}`}>
                 <span className="inline-block">{char}</span>
+                {/* Only show cursor after this character if this is the current position */}
                 {cursorPosition.line === lineIndex && cursorPosition.char === i + 1 && (
                   <span
                     className="h-6 w-0.5 bg-mathPurple animate-pulse mx-0.5 font-bold"
@@ -55,8 +56,8 @@ const WorkspaceEditor = forwardRef<HTMLDivElement, WorkspaceEditorProps>(
               </React.Fragment>
             ))}
 
-            {/* Empty line case - show cursor if this is an empty line */}
-            {flatLine.length === 0 && cursorPosition.line === lineIndex && (
+            {/* Empty line case - show cursor if this is an empty line and it's the current position */}
+            {flatLine.length === 0 && cursorPosition.line === lineIndex && cursorPosition.char === 0 && (
               <span
                 className="h-6 w-0.5 bg-mathPurple animate-pulse mx-0.5 font-bold"
                 style={{ width: '3px' }}
