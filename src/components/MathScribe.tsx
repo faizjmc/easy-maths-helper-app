@@ -47,7 +47,7 @@ const MathScribe: React.FC = () => {
     // Set cursor position to be after the inserted symbol
     const newCursorPos = {
       line: cursorPosition.line,
-      char: cursorPosition.char - 1
+      char: cursorPosition.char + 1
     };
     
     // Update cursor position
