@@ -36,7 +36,6 @@ const MathScribe: React.FC = () => {
     if (!newExpressions[activeTab]) {
       newExpressions[activeTab] = [['']];
     }
-    expressions, undo, redo, recordChange, canUndo, canRedo
     console.log('expressions:', expressions);
     console.log('undo:', undo);
     console.log('redo:', redo);
