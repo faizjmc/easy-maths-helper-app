@@ -87,8 +87,8 @@ const MathScribe: React.FC = () => {
   };
 
   const handleCursorChange = (position: {line: number, char: number}) => {
-    console.log('Cursor moved to:', position);
     setCursorPosition(position);
+    console.log('Cursor moved to:', position);
   };
 
   const handleUndo = () => {
