@@ -59,11 +59,7 @@ const MathScribe: React.FC = () => {
     };
        
     // Update cursor position
-    // setCursorPosition(newCursorPos);
-    updateCursorPosition({
-        ...cursorPosition,
-        char: cursorPosition.char + 1
-      });
+    setCursorPosition(newCursorPos);
     console.log('After insertion:', newCursorPos);
   };
   
