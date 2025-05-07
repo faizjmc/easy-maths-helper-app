@@ -50,6 +50,7 @@ const MathScribe: React.FC = () => {
     
     // Update expressions state
     recordChange(newExpressions);
+    console.log('newExpressions:', newExpressions);
     
     // Set cursor position to be after the inserted symbol
     const newCursorPos = {
