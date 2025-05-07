@@ -38,7 +38,7 @@ const WorkspaceEditor = forwardRef<HTMLDivElement, WorkspaceEditorProps>(
             {cursorPosition.line === lineIndex && cursorPosition.char === 0 && (
               <span
                 className="h-6 w-0.5 bg-mathPurple animate-pulse mr-0.5 font-bold"
-                style={{ width: '3px' }}
+                style={{ width: '1px' }}
               ></span>
             )}
 
@@ -50,7 +50,7 @@ const WorkspaceEditor = forwardRef<HTMLDivElement, WorkspaceEditorProps>(
                 {cursorPosition.line === lineIndex && cursorPosition.char === i + 1 && (
                   <span
                     className="h-6 w-0.5 bg-mathPurple animate-pulse mx-0.5 font-bold"
-                    style={{ width: '3px' }}
+                    style={{ width: '2px' }}
                   ></span>
                 )}
               </React.Fragment>
