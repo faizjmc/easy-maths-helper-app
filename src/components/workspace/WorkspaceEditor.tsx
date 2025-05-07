@@ -35,14 +35,14 @@ const WorkspaceEditor = forwardRef<HTMLDivElement, WorkspaceEditorProps>(
             className="min-h-[36px] flex items-center text-2xl mb-2 font-mono relative"
           >
             {/* Only display cursor at beginning of line if this is the current position */}
-            /*
-            {cursorPosition.line === lineIndex && cursorPosition.char === 0 && (
+            {/*
+            cursorPosition.line === lineIndex && cursorPosition.char === 0 && (
               <span
                 className="h-6 w-0.5 bg-mathPurple animate-pulse mr-0.5 font-bold"
                 style={{ width: '1px' }}
               ></span>
-            )}
-            */
+            )
+            */}
 
             {/* Render each character with potential cursor after it */}
             {flatLine.split('').map((char, i) => (
