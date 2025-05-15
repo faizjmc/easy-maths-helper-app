@@ -1,6 +1,7 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Pencil, Plus, Check } from "lucide-react";
+import { Plus, Check, Pencil } from "lucide-react";
 import { MathSymbolButton } from './MathSymbolButton';
 import { CategoryTab } from './CategoryTab';
 import { Switch } from '@/components/ui/switch';
@@ -146,7 +147,6 @@ export const EquationEditor: React.FC = () => {
                     </div>
                   ) : (
                     <>
-                      <Pencil size={16} />
                       <span>{tabNames[tabId]}</span>
                       <button 
                         onClick={(e) => startEditingTabName(tabId, e)} 
