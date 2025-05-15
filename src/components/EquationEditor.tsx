@@ -1,11 +1,11 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Pencil, Plus } from "lucide-react";
+import { Pencil, Plus, Check } from "lucide-react";
 import { MathSymbolButton } from './MathSymbolButton';
 import { CategoryTab } from './CategoryTab';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
+import { Input } from '@/components/ui/input';
 import { speakText } from '@/utils/textToSpeech';
 
 const categories = [
@@ -43,7 +43,11 @@ export const EquationEditor: React.FC = () => {
   const [textToSpeech, setTextToSpeech] = useState(false);
   const [symbolSize, setSymbolSize] = useState(16);
   const [highContrast, setHighContrast] = useState(false);
+  const [tabNames, setTabNames] = useState<{ [key: string]: string }>({ "tab-1": "Tab 1" });
+  const [editingTabId, setEditingTabId] = useState<string | null>(null);
+  const [editingTabName, setEditingTabName] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const tabInputRef = useRef<HTMLInputElement | null>(null);
 
   // Keep cursor visible at the end on input
   useEffect(() => {
@@ -54,6 +58,13 @@ export const EquationEditor: React.FC = () => {
       textareaRef.current.selectionEnd = textareaRef.current.value.length;
     }
   }, [tabData[activeTab]]);
+
+  // Focus input when editing tab name
+  useEffect(() => {
+    if (editingTabId && tabInputRef.current) {
+      tabInputRef.current.focus();
+    }
+  }, [editingTabId]);
 
   const handleSymbolClick = (symbol: string) => {
     const updatedEquation = tabData[activeTab] + symbol;
@@ -69,6 +80,7 @@ export const EquationEditor: React.FC = () => {
     const newTabId = `tab-${newTabCount}`;
     setTabCount(newTabCount);
     setTabData(prev => ({ ...prev, [newTabId]: "" }));
+    setTabNames(prev => ({ ...prev, [newTabId]: `Tab ${newTabCount}` }));
     setActiveTab(newTabId);
   };
 
@@ -83,26 +95,70 @@ export const EquationEditor: React.FC = () => {
     }
   };
 
+  const startEditingTabName = (tabId: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent tab switching when clicking pencil
+    setEditingTabId(tabId);
+    setEditingTabName(tabNames[tabId]);
+  };
+
+  const saveTabName = () => {
+    if (editingTabId) {
+      // Don't allow empty names
+      const newName = editingTabName.trim() || tabNames[editingTabId];
+      setTabNames(prev => ({ ...prev, [editingTabId]: newName }));
+      setEditingTabId(null);
+    }
+  };
+
+  const handleTabNameInputKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      saveTabName();
+    } else if (e.key === 'Escape') {
+      setEditingTabId(null);
+    }
+  };
+
   return (
     <div className={`w-full max-w-5xl mx-auto p-6 rounded-2xl shadow-xl ${highContrast ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>
       {/* Tabs section */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="flex items-center border-b pb-2 mb-4 overflow-x-auto">
           <TabsList className={highContrast ? 'bg-gray-700' : 'bg-gray-100'}>
-            <TabsTrigger value="tab-1" className={`flex items-center gap-1 ${highContrast ? 'data-[state=active]:bg-purple-700 data-[state=active]:text-white' : ''}`}>
-              <Pencil size={16} />
-              Tab 1
-            </TabsTrigger>
-            {Array.from({ length: tabCount - 1 }).map((_, i) => (
-              <TabsTrigger 
-                key={i + 2} 
-                value={`tab-${i + 2}`} 
-                className={`flex items-center gap-1 ${highContrast ? 'data-[state=active]:bg-purple-700 data-[state=active]:text-white' : ''}`}
-              >
-                <Pencil size={16} />
-                Tab {i + 2}
-              </TabsTrigger>
-            ))}
+            {Array.from({ length: tabCount }).map((_, i) => {
+              const tabId = `tab-${i + 1}`;
+              return (
+                <TabsTrigger 
+                  key={tabId} 
+                  value={tabId} 
+                  className={`flex items-center gap-1 ${highContrast ? 'data-[state=active]:bg-purple-700 data-[state=active]:text-white' : ''}`}
+                >
+                  {editingTabId === tabId ? (
+                    <div className="flex items-center" onClick={(e) => e.stopPropagation()}>
+                      <Input
+                        ref={tabInputRef}
+                        value={editingTabName}
+                        onChange={(e) => setEditingTabName(e.target.value)}
+                        onKeyDown={handleTabNameInputKeyDown}
+                        onBlur={saveTabName}
+                        className="h-6 w-24 px-1 py-0 text-xs"
+                      />
+                      <Check size={14} className="ml-1 cursor-pointer" onClick={saveTabName} />
+                    </div>
+                  ) : (
+                    <>
+                      <Pencil size={16} />
+                      <span>{tabNames[tabId]}</span>
+                      <button 
+                        onClick={(e) => startEditingTabName(tabId, e)} 
+                        className="ml-1 p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600"
+                      >
+                        <Pencil size={12} />
+                      </button>
+                    </>
+                  )}
+                </TabsTrigger>
+              );
+            })}
           </TabsList>
           <button 
             onClick={addNewTab}
