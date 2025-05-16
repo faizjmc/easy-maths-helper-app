@@ -5,12 +5,13 @@ import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 // Your web app's Firebase configuration
 // Replace these with your actual Firebase config values
 const firebaseConfig = {
-  apiKey: "AIzaSyD_placeholder_key",
-  authDomain: "your-app.firebaseapp.com",
-  projectId: "your-app",
-  storageBucket: "your-app.appspot.com",
-  messagingSenderId: "123456789012",
-  appId: "1:123456789012:web:abc123def456"
+  apiKey: "AIzaSyBAa3oS_xUdsUhj3yokayP4Tl-TQaCsuuU",
+  authDomain: "easy-maths-helper-app.firebaseapp.com",
+  projectId: "easy-maths-helper-app",
+  storageBucket: "easy-maths-helper-app.firebasestorage.app",
+  messagingSenderId: "508840638966",
+  appId: "1:508840638966:web:f0dd73c6583eec45462fd7",
+  measurementId: "G-FXMS1Z6GCX"
 };
 
 // Initialize Firebase
