@@ -1,13 +1,24 @@
 
 import React, { useRef, useEffect, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Check, Pencil } from "lucide-react";
+import { Plus, Check, Pencil, X } from "lucide-react";
 import { MathSymbolButton } from './MathSymbolButton';
 import { CategoryTab } from './CategoryTab';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
 import { speakText } from '@/utils/textToSpeech';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const categories = [
   "Numbers",
@@ -47,6 +58,7 @@ export const EquationEditor: React.FC = () => {
   const [tabNames, setTabNames] = useState<{ [key: string]: string }>({ "tab-1": "Tab 1" });
   const [editingTabId, setEditingTabId] = useState<string | null>(null);
   const [editingTabName, setEditingTabName] = useState("");
+  const [tabToDelete, setTabToDelete] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const tabInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -85,6 +97,46 @@ export const EquationEditor: React.FC = () => {
     setActiveTab(newTabId);
   };
 
+  const deleteTab = (tabId: string) => {
+    // Cannot delete the last remaining tab
+    if (Object.keys(tabData).length <= 1) {
+      return;
+    }
+
+    // Prepare for deletion
+    setTabToDelete(tabId);
+  };
+
+  const confirmDeleteTab = () => {
+    if (!tabToDelete) return;
+    
+    // Create new objects without the deleted tab
+    const newTabData = { ...tabData };
+    const newTabNames = { ...tabNames };
+    
+    delete newTabData[tabToDelete];
+    delete newTabNames[tabToDelete];
+    
+    // Update state
+    setTabData(newTabData);
+    setTabNames(newTabNames);
+    
+    // If the deleted tab was active, switch to another tab
+    if (activeTab === tabToDelete) {
+      const remainingTabs = Object.keys(newTabData);
+      if (remainingTabs.length > 0) {
+        setActiveTab(remainingTabs[0]);
+      }
+    }
+    
+    // Clear the tabToDelete state
+    setTabToDelete(null);
+  };
+
+  const cancelDeleteTab = () => {
+    setTabToDelete(null);
+  };
+
   const handleEquationChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
     setTabData(prev => ({ ...prev, [activeTab]: newValue }));
@@ -121,44 +173,74 @@ export const EquationEditor: React.FC = () => {
 
   return (
     <div className={`w-full max-w-5xl mx-auto p-6 rounded-2xl shadow-xl ${highContrast ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>
+      {/* Alert Dialog for Delete Confirmation */}
+      <AlertDialog open={tabToDelete !== null} onOpenChange={(isOpen) => !isOpen && setTabToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Tab</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {tabToDelete ? tabNames[tabToDelete] : "this tab"}? 
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelDeleteTab}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDeleteTab}
+              className="bg-red-500 hover:bg-red-600 text-white"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Tabs section */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="flex items-center border-b pb-2 mb-4 overflow-x-auto">
           <TabsList className={highContrast ? 'bg-gray-700' : 'bg-gray-100'}>
-            {Array.from({ length: tabCount }).map((_, i) => {
-              const tabId = `tab-${i + 1}`;
-              return (
-                <TabsTrigger 
-                  key={tabId} 
-                  value={tabId} 
-                  className={`flex items-center gap-1 ${highContrast ? 'data-[state=active]:bg-purple-700 data-[state=active]:text-white' : ''}`}
-                >
-                  {editingTabId === tabId ? (
-                    <div className="flex items-center" onClick={(e) => e.stopPropagation()}>
-                      <Input
-                        ref={tabInputRef}
-                        value={editingTabName}
-                        onChange={(e) => setEditingTabName(e.target.value)}
-                        onKeyDown={handleTabNameInputKeyDown}
-                        onBlur={saveTabName}
-                        className="h-6 w-24 px-1 py-0 text-xs"
-                      />
-                      <Check size={14} className="ml-1 cursor-pointer" onClick={saveTabName} />
-                    </div>
-                  ) : (
-                    <>
-                      <span>{tabNames[tabId]}</span>
+            {Object.keys(tabData).map((tabId) => (
+              <TabsTrigger 
+                key={tabId} 
+                value={tabId} 
+                className={`flex items-center gap-1 ${highContrast ? 'data-[state=active]:bg-purple-700 data-[state=active]:text-white' : ''}`}
+              >
+                {editingTabId === tabId ? (
+                  <div className="flex items-center" onClick={(e) => e.stopPropagation()}>
+                    <Input
+                      ref={tabInputRef}
+                      value={editingTabName}
+                      onChange={(e) => setEditingTabName(e.target.value)}
+                      onKeyDown={handleTabNameInputKeyDown}
+                      onBlur={saveTabName}
+                      className="h-6 w-24 px-1 py-0 text-xs"
+                    />
+                    <Check size={14} className="ml-1 cursor-pointer" onClick={saveTabName} />
+                  </div>
+                ) : (
+                  <>
+                    <span>{tabNames[tabId]}</span>
+                    <button 
+                      onClick={(e) => startEditingTabName(tabId, e)} 
+                      className="ml-1 p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600"
+                    >
+                      <Pencil size={12} />
+                    </button>
+                    {Object.keys(tabData).length > 1 && (
                       <button 
-                        onClick={(e) => startEditingTabName(tabId, e)} 
-                        className="ml-1 p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteTab(tabId);
+                        }} 
+                        className="ml-1 p-1 rounded-full hover:bg-red-100 dark:hover:bg-red-900"
                       >
-                        <Pencil size={12} />
+                        <X size={12} className="text-red-500" />
                       </button>
-                    </>
-                  )}
-                </TabsTrigger>
-              );
-            })}
+                    )}
+                  </>
+                )}
+              </TabsTrigger>
+            ))}
           </TabsList>
           <button 
             onClick={addNewTab}
@@ -174,12 +256,12 @@ export const EquationEditor: React.FC = () => {
         </div>
 
         {/* Tab contents */}
-        {Array.from({ length: tabCount }).map((_, i) => (
-          <TabsContent key={i + 1} value={`tab-${i + 1}`}>
+        {Object.keys(tabData).map((tabId) => (
+          <TabsContent key={tabId} value={tabId}>
             <div className="mb-6">
               <textarea
-                ref={i === parseInt(activeTab.split('-')[1]) - 1 ? textareaRef : null}
-                value={tabData[`tab-${i + 1}`] || ""}
+                ref={tabId === activeTab ? textareaRef : null}
+                value={tabData[tabId] || ""}
                 onChange={handleEquationChange}
                 className={`w-full h-40 p-4 border-2 border-dotted rounded-lg text-xl focus:outline-none ${
                   highContrast
