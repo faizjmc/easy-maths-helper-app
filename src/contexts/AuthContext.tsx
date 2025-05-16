@@ -50,7 +50,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Google sign-in error:', error);
       toast("Error", {
         description: "Failed to sign in with Google",
-        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -67,7 +66,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Logout error:', error);
       toast("Error", {
         description: "Failed to sign out",
-        variant: "destructive",
       });
     }
   };
