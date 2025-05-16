@@ -46,11 +46,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       toast("Success", {
         description: "You have successfully signed in",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Google sign-in error:', error);
-      toast("Error", {
-        description: "Failed to sign in with Google",
-      });
+      
+      // Provide more specific error message for unauthorized domain
+      if (error.code === 'auth/unauthorized-domain') {
+        toast("Authentication Error", {
+          description: "This domain is not authorized for authentication. Please add it to your Firebase console.",
+        });
+        console.log("To fix this error, add this domain to authorized domains in Firebase console: ", window.location.hostname);
+      } else {
+        toast("Error", {
+          description: "Failed to sign in with Google",
+        });
+      }
     } finally {
       setLoading(false);
     }
