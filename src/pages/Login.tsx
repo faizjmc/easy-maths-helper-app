@@ -8,13 +8,15 @@ const Login = () => {
   const { signInWithGoogle, currentUser, loading } = useAuth();
   const navigate = useNavigate();
 
+  // Only redirect if auth is fully initialized and we have a user
   useEffect(() => {
-    // Only redirect if auth is initialized and we have a currentUser
     if (currentUser && !loading) {
-      navigate('/', { replace: true }); // Use replace instead of push to prevent back button issues
+      console.log("User already logged in, redirecting to home");
+      navigate('/', { replace: true });
     }
   }, [currentUser, loading, navigate]);
 
+  // While auth is initializing, show a loading indicator
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -23,7 +25,7 @@ const Login = () => {
     );
   }
 
-  // Don't render the login page if user is already logged in
+  // Don't render login page content if already logged in
   if (currentUser) {
     return null;
   }
@@ -39,7 +41,6 @@ const Login = () => {
         <div className="mt-10 space-y-6">
           <Button 
             onClick={signInWithGoogle}
-            disabled={loading}
             className="w-full flex items-center justify-center gap-3 py-6"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">

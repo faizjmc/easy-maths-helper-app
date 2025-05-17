@@ -29,27 +29,24 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [authInitialized, setAuthInitialized] = useState(false);
-
+  
+  // Set up the Firebase auth state listener only once when component mounts
   useEffect(() => {
+    console.log("Setting up auth state listener");
     const unsubscribe = onAuthStateChanged(auth, (user) => {
+      console.log("Auth state changed:", user ? "User logged in" : "No user");
       setCurrentUser(user);
       setLoading(false);
-      if (!authInitialized) {
-        setAuthInitialized(true);
-      }
     });
 
-    return unsubscribe;
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
   }, []);
 
   const signInWithGoogle = async () => {
     try {
       setLoading(true);
-      
-      // Log the exact current domain for debugging
-      console.log("Current domain attempting authentication:", window.location.hostname);
-
+      console.log("Attempting Google sign-in");
       await signInWithPopup(auth, googleProvider);
       toast("Success", {
         description: "You have successfully signed in",
@@ -91,20 +88,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const value = {
     currentUser,
-    loading: loading && !authInitialized, // Only consider loading if auth hasn't initialized
+    loading,
     signInWithGoogle,
     logout
   };
 
+  // Render children directly, simpler approach
   return (
     <AuthContext.Provider value={value}>
-      {!authInitialized ? (
-        <div className="min-h-screen flex items-center justify-center">
-          <p className="text-lg">Loading authentication...</p>
-        </div>
-      ) : (
-        children
-      )}
+      {children}
     </AuthContext.Provider>
   );
 };
