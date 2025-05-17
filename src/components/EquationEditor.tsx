@@ -1,7 +1,9 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { Plus } from "lucide-react";
+import { useAuth } from '@/contexts/AuthContext';
+import { saveUserData, loadUserData, UserData } from '@/utils/userDataService';
+import { toast } from "@/components/ui/sonner";
 import { speakText } from '@/utils/textToSpeech';
 import { TabManager } from './TabManager';
 import { EquationTextArea } from './EquationTextArea';
@@ -19,6 +21,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export const EquationEditor: React.FC = () => {
+  const { currentUser } = useAuth();
   const [activeTab, setActiveTab] = useState("tab-1");
   const [activeCategory, setActiveCategory] = useState("Numbers");
   const [tabData, setTabData] = useState<{ [key: string]: string }>({ "tab-1": "" });
@@ -30,6 +33,80 @@ export const EquationEditor: React.FC = () => {
   const [editingTabId, setEditingTabId] = useState<string | null>(null);
   const [editingTabName, setEditingTabName] = useState("");
   const [tabToDelete, setTabToDelete] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load user data on component mount
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (currentUser) {
+        setIsLoading(true);
+        const userData = await loadUserData(currentUser.uid);
+        
+        if (userData) {
+          // Restore tabs
+          setTabData(userData.tabs.tabData);
+          setTabNames(userData.tabs.tabNames);
+          setActiveTab(userData.tabs.activeTab);
+          setTabCount(userData.tabs.tabCount);
+          
+          // Restore settings
+          setTextToSpeech(userData.settings.textToSpeech);
+          setSymbolSize(userData.settings.symbolSize);
+          setHighContrast(userData.settings.highContrast);
+          
+          toast("Success", {
+            description: "Your saved work has been loaded",
+          });
+        }
+        setIsLoading(false);
+      }
+    };
+    
+    fetchUserData();
+  }, [currentUser]);
+
+  // Save user data when state changes
+  useEffect(() => {
+    const saveData = async () => {
+      if (currentUser && !isLoading) {
+        const userData: UserData = {
+          tabs: {
+            tabData,
+            tabNames,
+            activeTab,
+            tabCount
+          },
+          settings: {
+            textToSpeech,
+            symbolSize,
+            highContrast
+          }
+        };
+        
+        await saveUserData(currentUser.uid, userData);
+      }
+    };
+    
+    // Don't save during initial loading
+    if (!isLoading) {
+      // Use debounce to avoid saving too frequently
+      const timer = setTimeout(() => {
+        saveData();
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [
+    currentUser,
+    tabData,
+    tabNames,
+    activeTab,
+    tabCount,
+    textToSpeech,
+    symbolSize,
+    highContrast,
+    isLoading
+  ]);
 
   const handleSymbolClick = (symbol: string) => {
     const updatedEquation = tabData[activeTab] + symbol;
@@ -122,6 +199,16 @@ export const EquationEditor: React.FC = () => {
       setEditingTabId(null);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className={`w-full max-w-5xl mx-auto p-6 rounded-2xl shadow-xl ${highContrast ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>
+        <div className="flex items-center justify-center h-64">
+          <p className="text-lg">Loading your equations...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`w-full max-w-5xl mx-auto p-6 rounded-2xl shadow-xl ${highContrast ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>
