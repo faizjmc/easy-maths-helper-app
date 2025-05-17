@@ -9,11 +9,24 @@ const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Redirect to home page if already logged in
+    // Only redirect if auth is initialized and we have a currentUser
     if (currentUser && !loading) {
-      navigate('/');
+      navigate('/', { replace: true }); // Use replace instead of push to prevent back button issues
     }
   }, [currentUser, loading, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  // Don't render the login page if user is already logged in
+  if (currentUser) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 to-gray-100 flex flex-col items-center justify-center p-4">

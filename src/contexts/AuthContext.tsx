@@ -29,11 +29,15 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authInitialized, setAuthInitialized] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       setLoading(false);
+      if (!authInitialized) {
+        setAuthInitialized(true);
+      }
     });
 
     return unsubscribe;
@@ -87,14 +91,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const value = {
     currentUser,
-    loading,
+    loading: loading && !authInitialized, // Only consider loading if auth hasn't initialized
     signInWithGoogle,
     logout
   };
 
   return (
     <AuthContext.Provider value={value}>
-      {children}
+      {!authInitialized ? (
+        <div className="min-h-screen flex items-center justify-center">
+          <p className="text-lg">Loading authentication...</p>
+        </div>
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
 };
