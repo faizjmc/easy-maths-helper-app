@@ -3,7 +3,6 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 
 // Your web app's Firebase configuration
-// Replace these with your actual Firebase config values
 const firebaseConfig = {
   apiKey: "AIzaSyBAa3oS_xUdsUhj3yokayP4Tl-TQaCsuuU",
   authDomain: "easy-maths-helper-app.firebaseapp.com",
@@ -23,5 +22,8 @@ export const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({
   prompt: 'select_account'
 });
+
+// Log Firebase configuration for debugging
+console.log("Firebase initialized with auth domain:", firebaseConfig.authDomain);
 
 export default app;

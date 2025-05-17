@@ -42,6 +42,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithGoogle = async () => {
     try {
       setLoading(true);
+      
+      // Log the exact current domain for debugging
+      console.log("Current domain attempting authentication:", window.location.hostname);
+
       await signInWithPopup(auth, googleProvider);
       toast("Success", {
         description: "You have successfully signed in",
@@ -51,13 +55,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Provide more specific error message for unauthorized domain
       if (error.code === 'auth/unauthorized-domain') {
+        const currentDomain = window.location.hostname;
         toast("Authentication Error", {
-          description: "This domain is not authorized for authentication. Please add it to your Firebase console.",
+          description: `Domain "${currentDomain}" is not authorized. Please add it to your Firebase console.`,
         });
-        console.log("To fix this error, add this domain to authorized domains in Firebase console: ", window.location.hostname);
+        console.log("IMPORTANT - Add this EXACT domain to Firebase authorized domains:", currentDomain);
+        console.log("Firebase Console Authentication Settings URL:", "https://console.firebase.google.com/project/easy-maths-helper-app/authentication/settings");
       } else {
         toast("Error", {
-          description: "Failed to sign in with Google",
+          description: "Failed to sign in with Google: " + (error.message || "Unknown error"),
         });
       }
     } finally {
