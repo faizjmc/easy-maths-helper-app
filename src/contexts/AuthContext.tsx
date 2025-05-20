@@ -40,7 +40,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     // Cleanup subscription on unmount
-    return () => unsubscribe();
+    return unsubscribe;
   }, []);
 
   const signInWithGoogle = async () => {
