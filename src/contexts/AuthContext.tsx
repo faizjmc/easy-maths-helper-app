@@ -8,10 +8,12 @@ import {
 } from 'firebase/auth';
 import { auth, googleProvider } from '@/lib/firebase';
 import { toast } from "@/components/ui/sonner";
+import { processPendingChanges } from '@/utils/userDataService';
 
 interface AuthContextType {
   currentUser: User | null;
   loading: boolean;
+  isOnline: boolean;
   signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -29,6 +31,37 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
+  
+  // Set up online/offline detection
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      toast("Connected", {
+        description: "You're back online. Syncing your data...",
+      });
+      
+      // Process any pending changes
+      if (currentUser) {
+        processPendingChanges();
+      }
+    };
+    
+    const handleOffline = () => {
+      setIsOnline(false);
+      toast("Offline Mode", {
+        description: "You're now offline. Changes will be saved locally.",
+      });
+    };
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [currentUser]);
   
   // Set up the Firebase auth state listener only once when component mounts
   useEffect(() => {
@@ -37,6 +70,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log("Auth state changed:", user ? "User logged in" : "No user");
       setCurrentUser(user);
       setLoading(false);
+      
+      // If we're online and user is logged in, check for pending changes
+      if (user && navigator.onLine) {
+        processPendingChanges();
+      }
     });
 
     // Cleanup subscription on unmount
@@ -89,6 +127,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const value = {
     currentUser,
     loading,
+    isOnline,
     signInWithGoogle,
     logout
   };

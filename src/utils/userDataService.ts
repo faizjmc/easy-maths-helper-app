@@ -11,7 +11,8 @@ const LOCAL_STORAGE_KEYS = {
   TAB_COUNT: 'mathsScribe_tabCount',
   TEXT_TO_SPEECH: 'mathsScribe_textToSpeech',
   SYMBOL_SIZE: 'mathsScribe_symbolSize',
-  HIGH_CONTRAST: 'mathsScribe_highContrast'
+  HIGH_CONTRAST: 'mathsScribe_highContrast',
+  PENDING_CHANGES: 'mathsScribe_pendingChanges'
 };
 
 export interface UserData {
@@ -41,6 +42,58 @@ const isLocalStorageAvailable = () => {
     return false;
   }
 };
+
+// Helper to check if the device is offline
+const isOffline = () => {
+  return !navigator.onLine;
+};
+
+// Store pending changes for sync when back online
+const storePendingChanges = (userId: string, data: UserData) => {
+  if (!isLocalStorageAvailable()) return;
+  
+  try {
+    const pendingChanges = {
+      userId,
+      data,
+      timestamp: new Date().getTime()
+    };
+    localStorage.setItem(LOCAL_STORAGE_KEYS.PENDING_CHANGES, JSON.stringify(pendingChanges));
+    console.log('Stored pending changes for later sync');
+  } catch (error) {
+    console.error('Error storing pending changes:', error);
+  }
+};
+
+// Process pending changes when back online
+export const processPendingChanges = async () => {
+  if (!isLocalStorageAvailable() || isOffline()) return;
+  
+  try {
+    const pendingChangesString = localStorage.getItem(LOCAL_STORAGE_KEYS.PENDING_CHANGES);
+    if (!pendingChangesString) return;
+    
+    const pendingChanges = JSON.parse(pendingChangesString);
+    if (pendingChanges && pendingChanges.userId && pendingChanges.data) {
+      console.log('Processing pending changes from offline mode');
+      await saveUserData(pendingChanges.userId, pendingChanges.data);
+      localStorage.removeItem(LOCAL_STORAGE_KEYS.PENDING_CHANGES);
+      toast("Synced", {
+        description: "Your changes have been synced to the cloud",
+      });
+    }
+  } catch (error) {
+    console.error('Error processing pending changes:', error);
+  }
+};
+
+// Set up online/offline event listeners
+if (typeof window !== 'undefined') {
+  window.addEventListener('online', () => {
+    console.log('Back online, syncing pending changes');
+    processPendingChanges();
+  });
+}
 
 // Get data from localStorage if available
 export const getLocalUserData = (): UserData | null => {
@@ -104,8 +157,34 @@ export const clearLocalUserData = () => {
   }
 };
 
+// Save user data to local storage as backup
+export const saveUserDataLocally = (data: UserData): void => {
+  if (!isLocalStorageAvailable()) return;
+  
+  try {
+    localStorage.setItem(LOCAL_STORAGE_KEYS.TABS, JSON.stringify(data.tabs.tabData));
+    localStorage.setItem(LOCAL_STORAGE_KEYS.TAB_NAMES, JSON.stringify(data.tabs.tabNames));
+    localStorage.setItem(LOCAL_STORAGE_KEYS.ACTIVE_TAB, data.tabs.activeTab);
+    localStorage.setItem(LOCAL_STORAGE_KEYS.TAB_COUNT, data.tabs.tabCount.toString());
+    localStorage.setItem(LOCAL_STORAGE_KEYS.TEXT_TO_SPEECH, JSON.stringify(data.settings.textToSpeech));
+    localStorage.setItem(LOCAL_STORAGE_KEYS.SYMBOL_SIZE, data.settings.symbolSize.toString());
+    localStorage.setItem(LOCAL_STORAGE_KEYS.HIGH_CONTRAST, JSON.stringify(data.settings.highContrast));
+    
+    console.log('User data saved locally as backup');
+  } catch (error) {
+    console.error('Error saving to localStorage:', error);
+  }
+};
+
 export const saveUserData = async (userId: string, data: UserData): Promise<void> => {
   try {
+    if (isOffline()) {
+      console.log('Device is offline. Saving data locally for later sync.');
+      saveUserDataLocally(data);
+      storePendingChanges(userId, data);
+      return;
+    }
+    
     // Add timestamps
     const dataWithTimestamps = {
       ...data,
@@ -127,22 +206,54 @@ export const saveUserData = async (userId: string, data: UserData): Promise<void
       await updateDoc(docRef, dataWithTimestamps);
       console.log('User data updated successfully');
     }
+    
+    // Also save locally as a backup
+    saveUserDataLocally(data);
+    
   } catch (error) {
     console.error('Error saving user data:', error);
-    toast("Error", {
-      description: "Failed to save your work",
-    });
+    
+    // Handle offline case or other errors
+    if (isOffline() || (error as any)?.code === 'unavailable') {
+      console.log('Device appears to be offline. Saving data locally for later sync.');
+      saveUserDataLocally(data);
+      storePendingChanges(userId, data);
+      toast("Offline Mode", {
+        description: "Changes saved locally and will sync when back online",
+      });
+    } else {
+      toast("Error", {
+        description: "Failed to save your work, but it's backed up locally",
+      });
+    }
   }
 };
 
 export const loadUserData = async (userId: string): Promise<UserData | null> => {
   try {
+    if (isOffline()) {
+      console.log('Device is offline. Loading from local storage.');
+      const localData = getLocalUserData();
+      if (localData) {
+        toast("Offline Mode", {
+          description: "Loaded data from local storage",
+        });
+        return localData;
+      }
+      return null;
+    }
+    
     const docRef = doc(db, 'userData', userId);
     const docSnap = await getDoc(docRef);
     
     if (docSnap.exists()) {
       console.log('User data loaded successfully from Firestore');
-      return docSnap.data() as UserData;
+      const userData = docSnap.data() as UserData;
+      
+      // Save to local storage as backup
+      saveUserDataLocally(userData);
+      
+      return userData;
     } else {
       console.log('No user data found in Firestore');
       
@@ -165,6 +276,16 @@ export const loadUserData = async (userId: string): Promise<UserData | null> => 
     }
   } catch (error) {
     console.error('Error loading user data:', error);
+    
+    // Try to fall back to local data
+    const localData = getLocalUserData();
+    if (localData) {
+      toast("Offline Mode", {
+        description: "Loaded from local backup due to connection issue",
+      });
+      return localData;
+    }
+    
     toast("Error", {
       description: "Failed to load your saved work",
     });

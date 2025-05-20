@@ -1,7 +1,7 @@
 
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -24,6 +24,16 @@ export const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({
   prompt: 'select_account'
 });
+
+// Enable offline persistence
+enableIndexedDbPersistence(db)
+  .catch((err) => {
+    if (err.code === 'failed-precondition') {
+      console.warn('Firebase persistence could not be enabled. Multiple tabs open.');
+    } else if (err.code === 'unimplemented') {
+      console.warn('The current browser does not support offline persistence.');
+    }
+  });
 
 // Log Firebase configuration for debugging
 console.log("Firebase initialized with auth domain:", firebaseConfig.authDomain);
