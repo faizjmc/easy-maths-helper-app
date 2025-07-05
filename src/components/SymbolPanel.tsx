@@ -34,15 +34,14 @@ export const operationSymbols = ['+', '-', '×', '÷', '=', '≠', '±'];
 export const comparisonSymbols = ['<', '>', '≤', '≥', '≈', '∝'];
 export const bracketSymbols = ['(', ')', '[', ']', '{', '}', '|'];
 export const superSubScriptSymbols = [
-  // Superscript numbers
+  // Superscript section
   '⁰', '¹', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹',
-  // Superscript symbols
   '⁺', '⁻', '⁼', '⁽', '⁾',
-  // Subscript numbers
+  // Visual separator (empty string to create gap)
+  '',
+  // Subscript section  
   '₀', '₁', '₂', '₃', '₄', '₅', '₆', '₇', '₈', '₉',
-  // Subscript symbols
   '₊', '₋', '₌', '₍', '₎',
-  // Common subscript letters
   'ₐ', 'ₑ', 'ᵢ', 'ₒ', 'ᵤ', 'ₓ'
 ];
 export const trigonometrySymbols = ['sin', 'cos', 'tan', 'csc', 'sec', 'cot', '°', '′', '″'];
@@ -95,16 +94,58 @@ export const SymbolPanel: React.FC<SymbolPanelProps> = ({
       </div>
 
       {/* Symbols section */}
-      <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 gap-2 mb-8">
-        {currentSymbols.map((symbol) => (
-          <MathSymbolButton 
-            key={symbol} 
-            onClick={() => handleSymbolClick(symbol)}
-            className={highContrast ? 'bg-gray-700 text-white hover:bg-gray-600' : ''}
-          >
-            {symbol}
-          </MathSymbolButton>
-        ))}
+      <div className="mb-8">
+        {activeCategory === "Super/Sub" ? (
+          <>
+            {/* Superscript section */}
+            <div className="mb-4">
+              <h3 className={`text-sm font-medium mb-2 ${highContrast ? 'text-gray-300' : 'text-gray-600'}`}>
+                Superscript
+              </h3>
+              <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 gap-2">
+                {['⁰', '¹', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹', '⁺', '⁻', '⁼', '⁽', '⁾'].map((symbol) => (
+                  <MathSymbolButton 
+                    key={symbol} 
+                    onClick={() => handleSymbolClick(symbol)}
+                    className={highContrast ? 'bg-gray-700 text-white hover:bg-gray-600' : ''}
+                  >
+                    {symbol}
+                  </MathSymbolButton>
+                ))}
+              </div>
+            </div>
+            
+            {/* Subscript section */}
+            <div>
+              <h3 className={`text-sm font-medium mb-2 ${highContrast ? 'text-gray-300' : 'text-gray-600'}`}>
+                Subscript
+              </h3>
+              <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 gap-2">
+                {['₀', '₁', '₂', '₃', '₄', '₅', '₆', '₇', '₈', '₉', '₊', '₋', '₌', '₍', '₎', 'ₐ', 'ₑ', 'ᵢ', 'ₒ', 'ᵤ', 'ₓ'].map((symbol) => (
+                  <MathSymbolButton 
+                    key={symbol} 
+                    onClick={() => handleSymbolClick(symbol)}
+                    className={highContrast ? 'bg-gray-700 text-white hover:bg-gray-600' : ''}
+                  >
+                    {symbol}
+                  </MathSymbolButton>
+                ))}
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 gap-2">
+            {currentSymbols.filter(symbol => symbol !== '').map((symbol) => (
+              <MathSymbolButton 
+                key={symbol} 
+                onClick={() => handleSymbolClick(symbol)}
+                className={highContrast ? 'bg-gray-700 text-white hover:bg-gray-600' : ''}
+              >
+                {symbol}
+              </MathSymbolButton>
+            ))}
+          </div>
+        )}
       </div>
     </>
   );
