@@ -79,9 +79,9 @@ export const SymbolPanel: React.FC<SymbolPanelProps> = ({
 
   return (
     <>
-      {/* Categories section - grid layout */}
+      {/* Categories section - improved responsive grid layout */}
       <div className="mb-6">
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-12 gap-1 sm:gap-2">
           {categories.map((category) => (
             <CategoryTab 
               key={category}
