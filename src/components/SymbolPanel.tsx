@@ -18,6 +18,7 @@ export const categories = [
   "Basic Operations",
   "Comparisons",
   "Brackets",
+  "Superscript/Subscript",
   "Trigonometry",
   "Advanced",
   "Set Theory",
@@ -32,6 +33,18 @@ export const letterSymbols = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 
 export const operationSymbols = ['+', '-', '×', '÷', '=', '≠', '±'];
 export const comparisonSymbols = ['<', '>', '≤', '≥', '≈', '∝'];
 export const bracketSymbols = ['(', ')', '[', ']', '{', '}', '|'];
+export const superSubScriptSymbols = [
+  // Superscript numbers
+  '⁰', '¹', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹',
+  // Superscript symbols
+  '⁺', '⁻', '⁼', '⁽', '⁾',
+  // Subscript numbers
+  '₀', '₁', '₂', '₃', '₄', '₅', '₆', '₇', '₈', '₉',
+  // Subscript symbols
+  '₊', '₋', '₌', '₍', '₎',
+  // Common subscript letters
+  'ₐ', 'ₑ', 'ᵢ', 'ₒ', 'ᵤ', 'ₓ'
+];
 export const trigonometrySymbols = ['sin', 'cos', 'tan', 'csc', 'sec', 'cot', '°', '′', '″'];
 export const advancedSymbols = ['π', '√', '∛', '∜', '∞', '^', '!', 'Σ', 'Π'];
 export const setTheorySymbols = ['∈', '∉', '⊂', '⊆', '∪', '∩', '∅', '∀', '∃'];
@@ -53,6 +66,7 @@ export const SymbolPanel: React.FC<SymbolPanelProps> = ({
       case "Basic Operations": return operationSymbols;
       case "Comparisons": return comparisonSymbols;
       case "Brackets": return bracketSymbols;
+      case "Superscript/Subscript": return superSubScriptSymbols;
       case "Trigonometry": return trigonometrySymbols;
       case "Advanced": return advancedSymbols;
       case "Set Theory": return setTheorySymbols;
@@ -68,7 +82,7 @@ export const SymbolPanel: React.FC<SymbolPanelProps> = ({
     <>
       {/* Categories section - grid layout */}
       <div className="mb-6">
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-11 gap-2">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-2">
           {categories.map((category) => (
             <CategoryTab 
               key={category}
