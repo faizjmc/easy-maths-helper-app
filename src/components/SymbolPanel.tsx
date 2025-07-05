@@ -18,7 +18,7 @@ export const categories = [
   "Basic Operations",
   "Comparisons",
   "Brackets",
-  "Superscript/Subscript",
+  "Super/Sub",
   "Trigonometry",
   "Advanced",
   "Set Theory",
@@ -66,7 +66,7 @@ export const SymbolPanel: React.FC<SymbolPanelProps> = ({
       case "Basic Operations": return operationSymbols;
       case "Comparisons": return comparisonSymbols;
       case "Brackets": return bracketSymbols;
-      case "Superscript/Subscript": return superSubScriptSymbols;
+      case "Super/Sub": return superSubScriptSymbols;
       case "Trigonometry": return trigonometrySymbols;
       case "Advanced": return advancedSymbols;
       case "Set Theory": return setTheorySymbols;
