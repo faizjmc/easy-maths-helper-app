@@ -24,7 +24,7 @@ export const saveUserPreferences = async (email: string, preferences: UserData):
       .from('user_preference')
       .upsert({
         user_email: email,
-        preferences: preferences
+        preferences: preferences as any
       });
 
     if (error) {
@@ -66,7 +66,7 @@ export const loadUserPreferences = async (email: string): Promise<UserData | nul
       toast("Success", {
         description: "Your saved preferences have been loaded",
       });
-      return data.preferences as UserData;
+      return data.preferences as unknown as UserData;
     }
 
     console.log('No preferences found for user');
