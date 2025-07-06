@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { useAuth } from '@/contexts/AuthContext';
-import { saveUserData, loadUserData, UserData } from '@/utils/userDataService';
+import { saveUserPreferences, loadUserPreferences, UserData } from '@/utils/supabaseUserDataService';
 import { toast } from "@/components/ui/sonner";
 import { speakText } from '@/utils/textToSpeech';
 import { TabManager } from './TabManager';
@@ -35,12 +34,14 @@ export const EquationEditor: React.FC = () => {
   const [tabToDelete, setTabToDelete] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load user data on component mount
+  // Load user preferences on component mount
   useEffect(() => {
-    const fetchUserData = async () => {
-      if (currentUser) {
+    const fetchUserPreferences = async () => {
+      if (currentUser?.email) {
         setIsLoading(true);
-        const userData = await loadUserData(currentUser.uid);
+        console.log('Fetching preferences for user:', currentUser.email);
+        
+        const userData = await loadUserPreferences(currentUser.email);
         
         if (userData) {
           // Restore tabs
@@ -53,22 +54,20 @@ export const EquationEditor: React.FC = () => {
           setTextToSpeech(userData.settings.textToSpeech);
           setSymbolSize(userData.settings.symbolSize);
           setHighContrast(userData.settings.highContrast);
-          
-          toast("Success", {
-            description: "Your saved work has been loaded",
-          });
         }
+        setIsLoading(false);
+      } else {
         setIsLoading(false);
       }
     };
     
-    fetchUserData();
+    fetchUserPreferences();
   }, [currentUser]);
 
-  // Save user data when state changes
+  // Save user preferences when state changes
   useEffect(() => {
-    const saveData = async () => {
-      if (currentUser && !isLoading) {
+    const savePreferences = async () => {
+      if (currentUser?.email && !isLoading) {
         const userData: UserData = {
           tabs: {
             tabData,
@@ -83,7 +82,8 @@ export const EquationEditor: React.FC = () => {
           }
         };
         
-        await saveUserData(currentUser.uid, userData);
+        console.log('Saving preferences for user:', currentUser.email);
+        await saveUserPreferences(currentUser.email, userData);
       }
     };
     
@@ -91,7 +91,7 @@ export const EquationEditor: React.FC = () => {
     if (!isLoading) {
       // Use debounce to avoid saving too frequently
       const timer = setTimeout(() => {
-        saveData();
+        savePreferences();
       }, 1000);
       
       return () => clearTimeout(timer);
