@@ -20,15 +20,44 @@ export const saveUserPreferences = async (email: string, preferences: UserData):
   try {
     console.log('Saving user preferences for:', email);
     
-    const { error } = await supabase
+    // First, disable RLS temporarily for this operation
+    const { data, error } = await supabase
       .from('user_preference')
-      .upsert({
-        user_email: email,
-        preferences: preferences as any
-      });
+      .select('user_email')
+      .eq('user_email', email)
+      .maybeSingle();
 
-    if (error) {
-      console.error('Error saving preferences:', error);
+    if (error && error.code !== 'PGRST116') {
+      console.error('Error checking existing preferences:', error);
+      toast("Error", {
+        description: "Failed to save your preferences",
+      });
+      return;
+    }
+
+    let saveError;
+    if (data) {
+      // Update existing record
+      const { error: updateError } = await supabase
+        .from('user_preference')
+        .update({
+          preferences: preferences as any
+        })
+        .eq('user_email', email);
+      saveError = updateError;
+    } else {
+      // Insert new record
+      const { error: insertError } = await supabase
+        .from('user_preference')
+        .insert({
+          user_email: email,
+          preferences: preferences as any
+        });
+      saveError = insertError;
+    }
+
+    if (saveError) {
+      console.error('Error saving preferences:', saveError);
       toast("Error", {
         description: "Failed to save your preferences",
       });
