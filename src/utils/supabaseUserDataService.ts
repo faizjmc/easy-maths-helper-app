@@ -16,56 +16,43 @@ export interface UserData {
   };
 }
 
-export const saveUserPreferences = async (email: string, preferences: UserData): Promise<void> => {
+export const saveUserPreferences = async (preferences: UserData): Promise<void> => {
   try {
-    console.log('Saving user preferences for:', email);
-    console.log('Preferences data:', preferences);
+    // Get current user from Supabase
+    const { data: { user } } = await supabase.auth.getUser();
     
-    // Check if user preferences already exist
-    const { data, error } = await supabase
-      .from('user_preference')
-      .select('user_email')
-      .eq('user_email', email)
-      .maybeSingle();
-
-    if (error && error.code !== 'PGRST116') {
-      console.error('Error checking existing preferences:', error);
+    if (!user?.email) {
+      console.error('No authenticated user found');
       toast("Error", {
-        description: "Failed to save your preferences",
+        description: "You must be logged in to save preferences",
       });
       return;
     }
 
-    let saveError;
-    if (data) {
-      // Update existing record
-      console.log('Updating existing preferences for:', email);
-      const { error: updateError } = await supabase
-        .from('user_preference')
-        .update({
-          preferences: preferences as any
-        })
-        .eq('user_email', email);
-      saveError = updateError;
-    } else {
-      // Insert new record
-      console.log('Creating new preferences record for:', email);
-      const { error: insertError } = await supabase
-        .from('user_preference')
-        .insert({
-          user_email: email,
-          preferences: preferences as any
-        });
-      saveError = insertError;
-    }
+    const email = user.email;
+    console.log('Saving user preferences for:', email);
+    console.log('Preferences data:', preferences);
+    
+    // Use upsert to either insert or update
+    const { error } = await supabase
+      .from('user_preference')
+      .upsert({
+        user_email: email,
+        preferences: preferences as any
+      }, {
+        onConflict: 'user_email'
+      });
 
-    if (saveError) {
-      console.error('Error saving preferences:', saveError);
+    if (error) {
+      console.error('Error saving preferences:', error);
       toast("Error", {
         description: "Failed to save your preferences",
       });
     } else {
       console.log('Preferences saved successfully for:', email);
+      toast("Success", {
+        description: "Your preferences have been saved",
+      });
     }
   } catch (error) {
     console.error('Error in saveUserPreferences:', error);
@@ -75,8 +62,17 @@ export const saveUserPreferences = async (email: string, preferences: UserData):
   }
 };
 
-export const loadUserPreferences = async (email: string): Promise<UserData | null> => {
+export const loadUserPreferences = async (): Promise<UserData | null> => {
   try {
+    // Get current user from Supabase
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user?.email) {
+      console.error('No authenticated user found');
+      return null;
+    }
+
+    const email = user.email;
     console.log('Loading user preferences for:', email);
     
     const { data, error } = await supabase

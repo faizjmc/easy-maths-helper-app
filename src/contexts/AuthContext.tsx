@@ -1,20 +1,16 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { 
-  User, 
-  signInWithPopup, 
-  signOut, 
-  onAuthStateChanged 
-} from 'firebase/auth';
-import { auth, googleProvider } from '@/lib/firebase';
+import { User, Session } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from "@/components/ui/sonner";
-import { processPendingChanges } from '@/utils/userDataService';
 
 interface AuthContextType {
   currentUser: User | null;
+  session: Session | null;
   loading: boolean;
-  isOnline: boolean;
   signInWithGoogle: () => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -30,81 +26,107 @@ export const useAuth = () => {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
   
-  // Set up online/offline detection
+  // Set up Supabase auth state listener
   useEffect(() => {
-    const handleOnline = () => {
-      setIsOnline(true);
-      toast("Connected", {
-        description: "You're back online. Syncing your data...",
-      });
-      
-      // Process any pending changes
-      if (currentUser) {
-        processPendingChanges();
+    console.log("Setting up Supabase auth state listener");
+    
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log("Auth state changed:", event, session ? "User logged in" : "No user");
+        setSession(session);
+        setCurrentUser(session?.user ?? null);
+        setLoading(false);
       }
-    };
-    
-    const handleOffline = () => {
-      setIsOnline(false);
-      toast("Offline Mode", {
-        description: "You're now offline. Changes will be saved locally.",
-      });
-    };
-    
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, [currentUser]);
-  
-  // Set up the Firebase auth state listener only once when component mounts
-  useEffect(() => {
-    console.log("Setting up auth state listener");
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      console.log("Auth state changed:", user ? "User logged in" : "No user");
-      setCurrentUser(user);
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setCurrentUser(session?.user ?? null);
       setLoading(false);
-      
-      // If we're online and user is logged in, check for pending changes
-      if (user && navigator.onLine) {
-        processPendingChanges();
-      }
     });
 
-    // Cleanup subscription on unmount
-    return unsubscribe;
+    return () => subscription.unsubscribe();
   }, []);
 
   const signInWithGoogle = async () => {
     try {
       setLoading(true);
-      console.log("Attempting Google sign-in");
-      await signInWithPopup(auth, googleProvider);
+      console.log("Attempting Google sign-in with Supabase");
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/`
+        }
+      });
+      
+      if (error) throw error;
+      
       toast("Success", {
         description: "You have successfully signed in",
       });
     } catch (error: any) {
       console.error('Google sign-in error:', error);
+      toast("Error", {
+        description: "Failed to sign in with Google: " + (error.message || "Unknown error"),
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signInWithEmail = async (email: string, password: string) => {
+    try {
+      setLoading(true);
+      console.log("Attempting email sign-in");
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
       
-      // Provide more specific error message for unauthorized domain
-      if (error.code === 'auth/unauthorized-domain') {
-        const currentDomain = window.location.hostname;
-        toast("Authentication Error", {
-          description: `Domain "${currentDomain}" is not authorized. Please add it to your Firebase console.`,
-        });
-        console.log("IMPORTANT - Add this EXACT domain to Firebase authorized domains:", currentDomain);
-        console.log("Firebase Console Authentication Settings URL:", "https://console.firebase.google.com/project/easy-maths-helper-app/authentication/settings");
-      } else {
-        toast("Error", {
-          description: "Failed to sign in with Google: " + (error.message || "Unknown error"),
-        });
-      }
+      if (error) throw error;
+      
+      toast("Success", {
+        description: "You have successfully signed in",
+      });
+    } catch (error: any) {
+      console.error('Email sign-in error:', error);
+      toast("Error", {
+        description: "Failed to sign in: " + (error.message || "Unknown error"),
+      });
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signUp = async (email: string, password: string) => {
+    try {
+      setLoading(true);
+      console.log("Attempting sign up");
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`
+        }
+      });
+      
+      if (error) throw error;
+      
+      toast("Success", {
+        description: "Check your email for the confirmation link",
+      });
+    } catch (error: any) {
+      console.error('Sign up error:', error);
+      toast("Error", {
+        description: "Failed to sign up: " + (error.message || "Unknown error"),
+      });
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -112,7 +134,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     try {
-      await signOut(auth);
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
       toast("Success", {
         description: "You have been signed out",
       });
@@ -126,9 +150,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const value = {
     currentUser,
+    session,
     loading,
-    isOnline,
     signInWithGoogle,
+    signInWithEmail,
+    signUp,
     logout
   };
 

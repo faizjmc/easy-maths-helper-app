@@ -41,7 +41,7 @@ export const EquationEditor: React.FC = () => {
         setIsLoading(true);
         console.log('Fetching preferences for user:', currentUser.email);
         
-        const userData = await loadUserPreferences(currentUser.email);
+        const userData = await loadUserPreferences();
         
         if (userData) {
           // Restore tabs
@@ -83,7 +83,7 @@ export const EquationEditor: React.FC = () => {
         };
         
         console.log('Saving preferences for user:', currentUser.email);
-        await saveUserPreferences(currentUser.email, userData);
+        await saveUserPreferences(userData);
       }
     };
     
